@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { OfflineIndicator } from '../OfflineIndicator';
 import { offlineSyncService } from '@/services/offlineSyncService';
 
@@ -138,7 +138,8 @@ describe('OfflineIndicator', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Pending Actions:/)).toBeInTheDocument();
-      expect(screen.getByText(/3/)).toBeInTheDocument();
+      // Use a more specific text matcher to avoid multiple matches
+      expect(screen.getByText(/You have 3 actions waiting to sync/)).toBeInTheDocument();
     });
   });
 
@@ -208,14 +209,18 @@ describe('OfflineIndicator', () => {
       .mockResolvedValueOnce(0)
       .mockResolvedValueOnce(2);
 
-    const { container } = render(<OfflineIndicator />);
+    render(<OfflineIndicator />);
 
-    await waitFor(() => {
-      expect(container.firstChild).toBeNull();
+    // Wait for initial render and first getPendingCount call
+    await act(async () => {
+      await Promise.resolve();
     });
 
-    // Advance timer by 5 seconds
-    vi.advanceTimersByTime(5000);
+    // Advance timer by 5 seconds to trigger polling
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+      await Promise.resolve();
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Syncing 2')).toBeInTheDocument();

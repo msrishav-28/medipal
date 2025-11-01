@@ -1,5 +1,5 @@
 import { Caregiver, AccessCode, CaregiverActivity } from '@/types';
-import { databaseService, DatabaseCaregiver, DatabaseAccessCode, DatabaseCaregiverActivity } from './database';
+import { db, DatabaseCaregiver, DatabaseAccessCode, DatabaseCaregiverActivity } from './database';
 
 /**
  * Repository for caregiver data with automatic Date/number conversion
@@ -74,80 +74,80 @@ export class CaregiverRepository {
 
   // Caregiver operations
   async addCaregiver(caregiver: Caregiver): Promise<string> {
-    return await databaseService.caregivers.add(this.toDatabase(caregiver) as DatabaseCaregiver);
+    return await db.caregivers.add(this.toDatabase(caregiver) as DatabaseCaregiver);
   }
 
   async getCaregiver(id: string): Promise<Caregiver | undefined> {
-    const db = await databaseService.caregivers.get(id);
-    return db ? this.toCaregiver(db) : undefined;
+    const dbCaregiver = await db.caregivers.get(id);
+    return dbCaregiver ? this.toCaregiver(dbCaregiver) : undefined;
   }
 
   async getCaregiverByPatient(patientId: string): Promise<Caregiver[]> {
-    const dbCaregivers = await databaseService.caregivers
+    const dbCaregivers = await db.caregivers
       .where('patientId')
       .equals(patientId)
-      .and((c: any) => c.isActive)
+      .and((c: DatabaseCaregiver) => c.isActive)
       .toArray();
-    return dbCaregivers.map(c => this.toCaregiver(c));
+    return dbCaregivers.map((c: DatabaseCaregiver) => this.toCaregiver(c));
   }
 
   async updateCaregiver(id: string, updates: Partial<Caregiver>): Promise<number> {
-    return await databaseService.caregivers.update(id, this.toDatabase(updates));
+    return await db.caregivers.update(id, this.toDatabase(updates));
   }
 
   // Access code operations
   async addAccessCode(code: AccessCode): Promise<string> {
-    return await databaseService.accessCodes.add(this.toAccessCodeDB(code));
+    return await db.accessCodes.add(this.toAccessCodeDB(code));
   }
 
   async getAccessCodeByCode(code: string): Promise<AccessCode | undefined> {
-    const db = await databaseService.accessCodes.where('code').equals(code).first();
-    return db ? this.toAccessCode(db) : undefined;
+    const dbCode = await db.accessCodes.where('code').equals(code).first();
+    return dbCode ? this.toAccessCode(dbCode) : undefined;
   }
 
   async updateAccessCode(id: string, updates: Partial<AccessCode>): Promise<number> {
     const dbUpdates: any = { ...updates };
     if (updates.expiresAt) dbUpdates.expiresAt = updates.expiresAt.getTime();
     if (updates.createdAt) dbUpdates.createdAt = updates.createdAt.getTime();
-    return await databaseService.accessCodes.update(id, dbUpdates);
+    return await db.accessCodes.update(id, dbUpdates);
   }
 
   async deleteAccessCode(id: string): Promise<void> {
-    await databaseService.accessCodes.delete(id);
+    await db.accessCodes.delete(id);
   }
 
   async getExpiredCodes(before: Date): Promise<AccessCode[]> {
     const timestamp = before.getTime();
-    const dbCodes = await databaseService.accessCodes
+    const dbCodes = await db.accessCodes
       .where('expiresAt')
       .below(timestamp)
       .toArray();
-    return dbCodes.map(c => this.toAccessCode(c));
+    return dbCodes.map((c: DatabaseAccessCode) => this.toAccessCode(c));
   }
 
   // Activity operations
   async addActivity(activity: CaregiverActivity): Promise<string> {
-    return await databaseService.caregiverActivities.add(this.toActivityDB(activity));
+    return await db.caregiverActivities.add(this.toActivityDB(activity));
   }
 
   async getActivitiesByCaregiver(caregiverId: string, limit: number = 50): Promise<CaregiverActivity[]> {
-    const dbActivities = await databaseService.caregiverActivities
+    const dbActivities = await db.caregiverActivities
       .where('caregiverId')
       .equals(caregiverId)
       .reverse()
       .limit(limit)
       .toArray();
-    return dbActivities.map(a => this.toActivity(a));
+    return dbActivities.map((a: DatabaseCaregiverActivity) => this.toActivity(a));
   }
 
   async getActivitiesByPatient(patientId: string, limit: number = 50): Promise<CaregiverActivity[]> {
-    const dbActivities = await databaseService.caregiverActivities
+    const dbActivities = await db.caregiverActivities
       .where('patientId')
       .equals(patientId)
       .reverse()
       .limit(limit)
       .toArray();
-    return dbActivities.map(a => this.toActivity(a));
+    return dbActivities.map((a: DatabaseCaregiverActivity) => this.toActivity(a));
   }
 }
 

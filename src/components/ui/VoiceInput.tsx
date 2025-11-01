@@ -42,9 +42,8 @@ export function VoiceInput({
   continuous = false,
   interimResults = true
 }: VoiceInputProps) {
-  const [inputMode, setInputMode] = useState<'text' | 'voice'>('text');
   const [hasUserInput, setHasUserInput] = useState(false);
-  // const textareaRef
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const {
     isSupported,
     isListening,
@@ -74,7 +73,7 @@ export function VoiceInput({
   // Handle speech recognition results
   useEffect(() => {
     if (finalTranscript && !hasUserInput) {
-      // const newValue
+      const newValue = value ? `${value} ${finalTranscript}` : finalTranscript;
       onChange(newValue);
       
       // Auto-submit if enabled and confidence is high enough
@@ -87,7 +86,8 @@ export function VoiceInput({
   }, [finalTranscript, hasUserInput, value, onChange, onSubmit, autoSubmitOnSpeech, confidence, confidenceThreshold, clearTranscript]);
 
   // Handle text input changes
-  // const handleTextChange
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
     if (maxLength && newValue.length > maxLength) return;
     
     onChange(newValue);
@@ -98,10 +98,10 @@ export function VoiceInput({
   };
 
   // Handle key press events
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      onSubmit(value);
+      onSubmit?.(value);
     }
     // Allow Shift+Enter to create new lines (default behavior)
   };
@@ -109,18 +109,15 @@ export function VoiceInput({
   // Handle voice input start
   const handleStartListening = async () => {
     try {
-      setInputMode('voice');
       await startListening();
     } catch (error) {
       console.error('Failed to start voice input:', error);
-      setInputMode('text');
     }
   };
 
   // Handle voice input stop
   const handleStopListening = () => {
     stopListening();
-    setInputMode('text');
     
     // Focus text input after stopping voice
     setTimeout(() => {
@@ -130,7 +127,7 @@ export function VoiceInput({
 
   // Auto-resize textarea
   useEffect(() => {
-    // const textarea
+    const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
       textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
@@ -138,7 +135,10 @@ export function VoiceInput({
   }, [value, transcript]);
 
   // Display value (includes interim results when listening)
-  // const displayValue
+  const displayValue = isListening && interimTranscript
+    ? `${value} ${interimTranscript}`.trim()
+    : value;
+  
   return (
     <div className={cn('relative', className)}>
       {/* Main input container */}
@@ -148,7 +148,7 @@ export function VoiceInput({
           ref={textareaRef}
           value={displayValue}
           onChange={handleTextChange}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           placeholder={isListening ? 'Listening... Speak now' : placeholder}
           disabled={disabled || isListening}
           autoFocus={autoFocus}
@@ -218,11 +218,10 @@ export function VoiceInput({
               <button
                 onClick={() => {
                   resetError();
-                  setInputMode('text');
                 }}
                 className="mt-1 text-red-700 hover:text-red-800 underline text-xs"
               >
-                Switch to text input
+                Dismiss
               </button>
             </div>
           </div>
@@ -253,4 +252,3 @@ export function VoiceInput({
     </div>
   );
 }
-

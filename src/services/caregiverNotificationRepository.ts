@@ -1,9 +1,5 @@
-import { databaseService } from './databaseService';
+import { db, DatabaseCaregiverNotification, DatabaseCaregiverNotificationDelivery } from './database';
 import { CaregiverNotification, CaregiverNotificationDelivery } from '../types/notification';
-import {
-  DatabaseCaregiverNotification,
-  DatabaseCaregiverNotificationDelivery
-} from './database';
 
 /**
  * Repository for caregiver notifications with Date/number conversions
@@ -127,14 +123,14 @@ class CaregiverNotificationRepository {
    * Add a new notification
    */
   async addNotification(notification: CaregiverNotification): Promise<void> {
-    await databaseService.caregiverNotifications.add(this.toDatabase(notification));
+    await db.caregiverNotifications.add(this.toDatabase(notification));
   }
 
   /**
    * Get notification by ID
    */
   async getNotification(id: string): Promise<CaregiverNotification | undefined> {
-    const dbNotification = await databaseService.caregiverNotifications.get(id);
+    const dbNotification = await db.caregiverNotifications.get(id);
     return dbNotification ? this.toNotification(dbNotification) : undefined;
   }
 
@@ -142,14 +138,14 @@ class CaregiverNotificationRepository {
    * Get notifications for a caregiver
    */
   async getNotificationsByCaregiver(caregiverId: string, limit = 50): Promise<CaregiverNotification[]> {
-    const dbNotifications = await databaseService.caregiverNotifications
+    const dbNotifications = await db.caregiverNotifications
       .where('caregiverId')
       .equals(caregiverId)
       .reverse()
       .limit(limit)
       .toArray();
 
-    return dbNotifications.map(n => this.toNotification(n));
+    return dbNotifications.map((n: DatabaseCaregiverNotification) => this.toNotification(n));
   }
 
   /**
@@ -168,17 +164,17 @@ class CaregiverNotificationRepository {
       dbUpdates.createdAt = updates.createdAt.getTime();
     }
 
-    await databaseService.caregiverNotifications.update(id, dbUpdates);
+    await db.caregiverNotifications.update(id, dbUpdates);
   }
 
   /**
    * Get unread count
    */
   async getUnreadCount(caregiverId: string): Promise<number> {
-    return await databaseService.caregiverNotifications
+    return await db.caregiverNotifications
       .where('caregiverId')
       .equals(caregiverId)
-      .and(n => !n.isRead)
+      .and((n: DatabaseCaregiverNotification) => !n.isRead)
       .count();
   }
 
@@ -186,19 +182,19 @@ class CaregiverNotificationRepository {
    * Add a new delivery
    */
   async addDelivery(delivery: CaregiverNotificationDelivery): Promise<void> {
-    await databaseService.caregiverNotificationDeliveries.add(this.toDeliveryDB(delivery));
+    await db.caregiverNotificationDeliveries.add(this.toDeliveryDB(delivery));
   }
 
   /**
    * Get pending deliveries
    */
   async getPendingDeliveries(): Promise<CaregiverNotificationDelivery[]> {
-    const dbDeliveries = await databaseService.caregiverNotificationDeliveries
+    const dbDeliveries = await db.caregiverNotificationDeliveries
       .where('status')
       .equals('pending')
       .toArray();
 
-    return dbDeliveries.map(d => this.toDelivery(d));
+    return dbDeliveries.map((d: DatabaseCaregiverNotificationDelivery) => this.toDelivery(d));
   }
 
   /**
@@ -214,7 +210,7 @@ class CaregiverNotificationRepository {
       dbUpdates.createdAt = updates.createdAt.getTime();
     }
 
-    await databaseService.caregiverNotificationDeliveries.update(id, dbUpdates);
+    await db.caregiverNotificationDeliveries.update(id, dbUpdates);
   }
 }
 

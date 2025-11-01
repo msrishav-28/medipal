@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
   NotificationPermissionState, 
-  NotificationSettings, 
-  MedicationReminder 
+  NotificationSettings 
 } from '@/types';
 import { notificationService, notificationScheduler } from '@/services';
 
@@ -103,91 +102,118 @@ export function useNotifications(): UseNotificationsReturn {
 
   // Listen for custom notification events
   useEffect(() => {
-    // const handleNotificationAction
+    const handleNotificationAction = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const { action, data } = customEvent.detail;
+      
       switch (action) {
         case 'taken':
-          handleMedicationTaken(data.reminderId);
+          void handleMedicationTaken(data.reminderId);
           break;
         case 'snooze':
-          handleMedicationSnooze(data.reminderId, 10);
+          void handleMedicationSnooze(data.reminderId, 10);
           break;
         case 'skip':
-          handleMedicationSkip(data.reminderId);
+          void handleMedicationSkip(data.reminderId);
           break;
       }
     };
 
-    window.addEventListener('notification-action', handleNotificationAction as EventListener);
+    window.addEventListener('notification-action', handleNotificationAction);
 
     return () => {
-      window.removeEventListener('notification-action', handleNotificationAction as EventListener);
+      window.removeEventListener('notification-action', handleNotificationAction);
     };
   }, []);
 
-  // const requestPermission
+  const requestPermission = useCallback(async (): Promise<NotificationPermissionState> => {
+    try {
+      const newPermissionState = await notificationService.requestPermission();
       setPermissionState(newPermissionState);
       setError(null);
       return newPermissionState;
     } catch (err) {
-      // const errorMessage
+      const errorMessage = err instanceof Error ? err.message : 'Failed to request notification permission';
       setError(errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
-  // const updateSettings
+  const updateSettings = useCallback(async (newSettings: Partial<NotificationSettings>): Promise<void> => {
+    try {
+      await notificationService.updateSettings(newSettings);
       setSettings(notificationService.getSettings());
       setError(null);
     } catch (err) {
-      // const errorMessage
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update notification settings';
       setError(errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
-  // const testNotification
+  const testNotification = useCallback(async (): Promise<void> => {
+    try {
+      await notificationService.testNotification();
       setError(null);
     } catch (err) {
-      // const errorMessage
+      const errorMessage = err instanceof Error ? err.message : 'Failed to show test notification';
       setError(errorMessage);
       throw new Error(errorMessage);
     }
   }, []);
 
-  // const handleMedicationTaken
+  const handleMedicationTaken = useCallback(async (reminderId: string): Promise<void> => {
+    try {
+      // Mark reminder as taken
+      await notificationScheduler.handleMedicationTaken(reminderId);
+      
       // Dispatch custom event for other components to listen to
-      // const event
+      const event = new CustomEvent('medication-taken', {
+        detail: { reminderId }
+      });
       window.dispatchEvent(event);
       
       setError(null);
     } catch (err) {
-      // const errorMessage
+      const errorMessage = err instanceof Error ? err.message : 'Failed to mark medication as taken';
       setError(errorMessage);
       console.error('Failed to handle medication taken:', err);
     }
   }, []);
 
-  // const handleMedicationSnooze
+  const handleMedicationSnooze = useCallback(async (reminderId: string, minutes: number): Promise<void> => {
+    try {
+      // Snooze the reminder
+      await notificationScheduler.handleMedicationSnooze(reminderId, minutes);
+      
       // Dispatch custom event
-      // const event
+      const event = new CustomEvent('medication-snoozed', {
+        detail: { reminderId, minutes }
+      });
       window.dispatchEvent(event);
       
       setError(null);
     } catch (err) {
-      // const errorMessage
+      const errorMessage = err instanceof Error ? err.message : 'Failed to snooze medication';
       setError(errorMessage);
       console.error('Failed to snooze medication:', err);
     }
   }, []);
 
-  // const handleMedicationSkip
+  const handleMedicationSkip = useCallback(async (reminderId: string, reason?: string): Promise<void> => {
+    try {
+      // Skip the reminder
+      await notificationScheduler.handleMedicationSkip(reminderId, reason);
+      
       // Dispatch custom event
-      // const event
+      const event = new CustomEvent('medication-skipped', {
+        detail: { reminderId, reason }
+      });
       window.dispatchEvent(event);
       
       setError(null);
     } catch (err) {
-      // const errorMessage
+      const errorMessage = err instanceof Error ? err.message : 'Failed to skip medication';
       setError(errorMessage);
       console.error('Failed to skip medication:', err);
     }

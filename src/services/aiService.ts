@@ -87,9 +87,10 @@ export class AIService {
     context: ChatContext
   ): Promise<AIResponse> {
     // First, use NLP service for intent recognition and entity extraction
-    // const intent
+    const intent = nlpService.recognizeIntent(userMessage, context.medications);
+    
     // Check for medication conflicts if adding new medication
-    // let conflicts
+    let conflicts: ConflictWarning[] = [];
     if (intent.type === 'add_medication' && intent.parameters.medicationName) {
       conflicts = nlpService.checkMedicationConflicts(
         intent.parameters.medicationName,
@@ -103,15 +104,30 @@ export class AIService {
     }
 
     try {
-      // const systemPrompt
-      // const enhancedPrompt
-      // const messages
-      // const response
+      const systemPrompt = this.createSystemPrompt(context);
+      const enhancedPrompt = this.enhancePromptWithNLP(systemPrompt, intent, conflicts);
+      const messages = this.formatMessages(userMessage, context, enhancedPrompt);
+      
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify({
+          model: this.model,
+          messages,
+          max_tokens: this.maxTokens,
+          temperature: this.temperature,
+          functions: this.getMedicationFunctions()
+        })
+      });
+      
       if (!response.ok) {
         throw new Error(`OpenAI API error: ${response.status}`);
       }
 
-      // const data
+      const data = await response.json();
       return this.parseAIResponse(data, context, intent, conflicts);
     } catch (error) {
       console.error('AI service error:', error);
@@ -123,7 +139,13 @@ export class AIService {
    * Create system prompt with medication context
    */
   private createSystemPrompt(context: ChatContext): string {
-    // const medicationList
+    const medicationList = context.medications
+      .map(med => {
+        const schedule = med.times?.join(', ') || `Every ${med.interval} hours`;
+        return `- ${med.name}: ${med.dosage} (${schedule})`;
+      })
+      .join('\n');
+      
     return `You are MediCare AI, a helpful assistant for medication management. You help elderly patients with their medication schedules, questions, and adherence.
 
 Current patient medications:
@@ -157,9 +179,12 @@ Remember: You are not a replacement for medical professionals. Always encourage 
     context: ChatContext,
     systemPrompt: string
   ): Array<{ role: string; content: string }> {
-    // const messages
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: systemPrompt }
+    ];
+    
     // Add recent conversation history (last 5 messages)
-    // const recentHistory
+    const recentHistory = context.conversationHistory.slice(-5);
     for (const msg of recentHistory) {
       messages.push({
         role: msg.type === 'user' ? 'user' : 'assistant',
@@ -267,19 +292,23 @@ Remember: You are not a replacement for medical professionals. Always encourage 
    * Generate NLP-based response when AI service is not available
    */
   private getNLPBasedResponse(
-    userMessage: string,
+    _userMessage: string,
     context: ChatContext,
     intent: Intent,
     conflicts: ConflictWarning[]
   ): AIResponse {
-    // const response
-    // let actions
-    // let medications
+    const response = nlpService.generateContextualResponse(
+      intent,
+      context.medications
+    );
+    let actions: ChatAction[] = [];
+    let medications: Medication[] = [];
+    
     // Generate actions based on intent
     switch (intent.type) {
       case 'mark_taken':
         if (intent.parameters.medicationName) {
-          // const medication
+          const medication = this.findMedication(intent.parameters.medicationName, context.medications);
           if (medication) {
             medications.push(medication);
             actions.push({
@@ -295,7 +324,7 @@ Remember: You are not a replacement for medical professionals. Always encourage 
       case 'check_status':
       case 'get_info':
         if (intent.parameters.medicationName) {
-          // const medication
+          const medication = this.findMedication(intent.parameters.medicationName, context.medications);
           if (medication) {
             medications.push(medication);
             actions.push({
@@ -321,7 +350,7 @@ Remember: You are not a replacement for medical professionals. Always encourage 
     }
     
     // Add conflict warnings to response
-    // let finalResponse
+    let finalResponse = response;
     if (conflicts.length > 0) {
       finalResponse += '\n\n⚠️ IMPORTANT WARNINGS:\n';
       for (const conflict of conflicts) {
@@ -348,21 +377,22 @@ Remember: You are not a replacement for medical professionals. Always encourage 
    * Parse AI response and extract actions
    */
   private parseAIResponse(data: any, context: ChatContext, detectedIntent?: Intent, conflicts?: ConflictWarning[]): AIResponse {
-    // const choice
-    // const message
-    // let responseText
-    // let actions
-    // let medications
-    // let intentType
+    const choice = data.choices?.[0];
+    const message = choice?.message;
+    let responseText = message?.content || 'I apologize, but I could not generate a response. Please try again.';
+    let actions: ChatAction[] = [];
+    let medications: Medication[] = [];
+    let intentType = '';
+    
     // Handle function calls
-    if (message.function_call) {
-      // const functionName
-      // const functionArgs
+    if (message?.function_call) {
+      const functionName = message.function_call.name;
+      const functionArgs = JSON.parse(message.function_call.arguments || '{}');
       intentType = functionName;
       
       switch (functionName) {
         case 'check_medication_status':
-          // const medication
+          const medication = this.findMedication(functionArgs.medicationName, context.medications);
           if (medication) {
             medications.push(medication);
             actions.push({
@@ -375,7 +405,7 @@ Remember: You are not a replacement for medical professionals. Always encourage 
           break;
           
         case 'get_medication_info':
-          // const med
+          const med = this.findMedication(functionArgs.medicationName, context.medications);
           if (med) {
             medications.push(med);
             actions.push({
@@ -388,7 +418,7 @@ Remember: You are not a replacement for medical professionals. Always encourage 
           break;
           
         case 'mark_medication_taken':
-          // const takeMed
+          const takeMed = this.findMedication(functionArgs.medicationName, context.medications);
           if (takeMed) {
             medications.push(takeMed);
             actions.push({
@@ -429,9 +459,11 @@ Remember: You are not a replacement for medical professionals. Always encourage 
    * Find medication by name (fuzzy matching)
    */
   private findMedication(name: string, medications: Medication[]): Medication | undefined {
-    // const lowerName
+    const lowerName = name.toLowerCase();
+    
     // Exact match first
-    // let found
+    let found = medications.find(med => med.name.toLowerCase() === lowerName);
+    
     // Partial match if no exact match
     if (!found) {
       found = medications.find(med => 
@@ -444,23 +476,19 @@ Remember: You are not a replacement for medical professionals. Always encourage 
   }
 
   /**
-   * Provide fallback response when AI service is not available
-   */
-  private getFallbackResponse(userMessage: string, context: ChatContext): AIResponse {
-    // Use NLP service for better fallback responses
-    // const intent
-    return this.getNLPBasedResponse(userMessage, context, intent, []);
-  }
-
-  /**
    * Generate quick suggestion buttons based on context
    */
   generateQuickSuggestions(context: ChatContext): string[] {
-    // const suggestions
+    const suggestions = [
+      'What medications should I take now?',
+      'Did I take my medicine today?',
+      'When is my next dose?'
+    ];
+    
     // Add medication-specific suggestions
-    // const activeMeds
+    const activeMeds = context.medications.filter(m => m.isActive);
     if (activeMeds.length > 0 && activeMeds[0]) {
-      // const firstMed
+      const firstMed = activeMeds[0];
       suggestions.push(`Tell me about ${firstMed.name}`);
     }
 

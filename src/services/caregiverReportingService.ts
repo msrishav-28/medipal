@@ -1,4 +1,4 @@
-import { databaseService } from './database';
+import { db, DatabaseIntakeRecord } from './database';
 import { caregiverNotificationService } from './caregiverNotificationService';
 import { IntakeRecord, Medication } from '../types';
 
@@ -69,16 +69,16 @@ class CaregiverReportingService {
     const startTime = startDate.getTime();
     const endTime = endDate.getTime();
 
-    const dbIntakes = await databaseService.intakeRecords
+    const dbIntakes = await db.intakeRecords
       .where('userId')
       .equals(userId)
-      .and((record: any) => {
+      .and((record: DatabaseIntakeRecord) => {
         const scheduledTime = record.scheduledTime;
         return scheduledTime >= startTime && scheduledTime <= endTime;
       })
       .toArray();
 
-    return dbIntakes.map(i => {
+    return dbIntakes.map((i: DatabaseIntakeRecord) => {
       const intake: IntakeRecord = {
         id: i.id,
         medicationId: i.medicationId,
@@ -131,7 +131,7 @@ class CaregiverReportingService {
    */
   async generateReport(patientId: string, startDate: Date, endDate: Date): Promise<PatientReport> {
     // Get patient information
-    const user = await databaseService.users.get(patientId);
+    const user = await db.users.get(patientId);
     if (!user) {
       throw new Error('Patient not found');
     }
@@ -143,7 +143,7 @@ class CaregiverReportingService {
     const overallAdherence = this.calculateAdherence(allIntakes, startDate, endDate);
 
     // Get active medications
-    const medications = await databaseService.medications
+    const medications = await db.medications
       .where('userId')
       .equals(patientId)
       .and((med: any) => med.isActive)

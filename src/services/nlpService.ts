@@ -462,7 +462,8 @@ export class NLPService {
       if (matrix[0]) matrix[0][i] = i;
     }
     for (let j = 0; j <= len2; j++) {
-      if (matrix[j]) matrix[j][0] = j;
+      const row = matrix[j];
+      if (row) row[0] = j;
     }
 
     for (let j = 1; j <= len2; j++) {

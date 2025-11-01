@@ -26,14 +26,15 @@ export class NotificationScheduler {
     // Clear existing schedules for this medication
     await this.clearMedicationSchedules(medication.id);
 
-    // const schedules
+    const schedules = this.generateSchedules(medication);
     this.activeSchedules.set(medication.id, schedules);
 
     // Schedule reminders for the next 7 days
-    // const now
-    // const endDate
+    const now = new Date();
+    const endDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    
     for (const schedule of schedules) {
-      // const reminders
+      const reminders = this.generateRemindersFromSchedule(medication, schedule, now, endDate);
       for (const reminder of reminders) {
         await this.scheduleReminder(reminder);
       }
@@ -44,7 +45,8 @@ export class NotificationScheduler {
    * Generate notification schedules from medication data
    */
   private generateSchedules(medication: Medication): NotificationSchedule[] {
-    // const schedules
+    const schedules: NotificationSchedule[] = [];
+    
     if (medication.scheduleType === 'time-based' && medication.times) {
       for (const time of medication.times) {
         schedules.push({
@@ -60,7 +62,7 @@ export class NotificationScheduler {
       }
     } else if (medication.scheduleType === 'interval-based' && medication.interval) {
       // For interval-based, create a schedule starting from now
-      // const startTime
+      const startTime = medication.startDate || new Date();
       schedules.push({
         id: `${medication.id}-interval`,
         medicationId: medication.id,
@@ -85,7 +87,7 @@ export class NotificationScheduler {
     startDate: Date,
     endDate: Date
   ): MedicationReminder[] {
-    // const reminders
+    const reminders: MedicationReminder[] = [];
     const [hours, minutes] = schedule.time.split(':').map(Number);
     
     if (hours === undefined || minutes === undefined) {
@@ -94,9 +96,10 @@ export class NotificationScheduler {
 
     if (medication.scheduleType === 'time-based') {
       // Generate daily reminders
-      // const currentDate
+      const currentDate = new Date(startDate);
+      
       while (currentDate <= endDate) {
-        // const dayOfWeek
+        const dayOfWeek = currentDate.getDay();
         if (schedule.daysOfWeek.includes(dayOfWeek)) {
           const reminderTime = new Date(currentDate);
           reminderTime.setHours(hours, minutes, 0, 0);
@@ -150,8 +153,9 @@ export class NotificationScheduler {
    * Schedule a single reminder
    */
   private async scheduleReminder(reminder: MedicationReminder): Promise<void> {
-    // const now
-    // const delay
+    const now = new Date();
+    const delay = reminder.scheduledTime.getTime() - now.getTime();
+    
     if (delay <= 0) {
       // Past due - show immediately
       await notificationService.scheduleReminder(reminder);
@@ -204,10 +208,9 @@ export class NotificationScheduler {
   /**
    * Get upcoming reminders for a user
    */
-  getUpcomingReminders(userId: string, hours: number = 24): MedicationReminder[] {
-    // const now
-    // const endTime
-    // const upcomingReminders
+  getUpcomingReminders(_userId: string, _hours: number = 24): MedicationReminder[] {
+    const upcomingReminders: MedicationReminder[] = [];
+    
     // This would typically query a database
     // For now, we'll return an empty array as reminders are scheduled in memory
     return upcomingReminders;
@@ -218,7 +221,7 @@ export class NotificationScheduler {
    */
   async handleMedicationTaken(reminderId: string, actualTime: Date = new Date()): Promise<void> {
     // Cancel the scheduled reminder
-    // const timeoutId
+    const timeoutId = this.scheduledReminders.get(reminderId);
     if (timeoutId) {
       clearTimeout(timeoutId);
       this.scheduledReminders.delete(reminderId);
@@ -233,7 +236,7 @@ export class NotificationScheduler {
    */
   async handleMedicationSnooze(reminderId: string, minutes: number): Promise<void> {
     // Cancel the current reminder
-    // const timeoutId
+    const timeoutId = this.scheduledReminders.get(reminderId);
     if (timeoutId) {
       clearTimeout(timeoutId);
       this.scheduledReminders.delete(reminderId);
@@ -245,12 +248,24 @@ export class NotificationScheduler {
 
     // In a real app, this would fetch the reminder from the database
     // For now, we'll create a mock reminder
-    // const medicationId
+    const medicationId = reminderId.split('-')[0];
     if (!medicationId) {
       return; // Invalid reminder ID
     }
     
-    // const mockReminder
+    const mockReminder: MedicationReminder = {
+      id: `${reminderId}-snooze`,
+      medicationId,
+      userId: 'user',
+      medicationName: 'Medication',
+      dosage: '1 pill',
+      scheduledTime: snoozeTime,
+      snoozeCount: 0,
+      maxSnoozes: 3,
+      isActive: true,
+      createdAt: new Date()
+    };
+    
     await this.scheduleReminder(mockReminder);
   }
 
@@ -259,7 +274,7 @@ export class NotificationScheduler {
    */
   async handleMedicationSkip(reminderId: string, reason?: string): Promise<void> {
     // Cancel the scheduled reminder
-    // const timeoutId
+    const timeoutId = this.scheduledReminders.get(reminderId);
     if (timeoutId) {
       clearTimeout(timeoutId);
       this.scheduledReminders.delete(reminderId);

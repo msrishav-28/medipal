@@ -1,4 +1,4 @@
-import { databaseService } from './database';
+import { db } from './database';
 import { caregiverService } from './caregiverService';
 import { caregiverNotificationRepository } from './caregiverNotificationRepository';
 import { CaregiverNotification, CaregiverNotificationDelivery } from '../types/notification';
@@ -288,7 +288,7 @@ class CaregiverNotificationService {
     const fifteenMinutesAgo = new Date(now.getTime() - 15 * 60 * 1000);
 
     // Get recent intake records
-    const recentIntakes = await databaseService.intakeRecords
+    const recentIntakes = await db.intakeRecords
       .where('userId')
       .equals(patientId)
       .and((record: any) => {
@@ -300,7 +300,7 @@ class CaregiverNotificationService {
     // Check for missed doses
     for (const intake of recentIntakes) {
       if (intake.status === 'missed') {
-        const medication = await databaseService.medications.get(intake.medicationId);
+        const medication = await db.medications.get(intake.medicationId);
         if (medication) {
           await this.sendMissedDoseAlert(
             patientId,

@@ -1,9 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Button, QueryProvider, MedicationList, MedicationDetail, AddMedicationWizard, PrescriptionScanner, PrescriptionReview, VoiceInputDemo, ChatDemo, MedicationParsingDemo } from '@/components';
 import { InstallPrompt, OfflineIndicator, UpdateNotification } from '@/components/pwa';
+import { PerformanceDashboard } from '@/components/dev';
 import { useBreakpoint, useMedications, useCreateMedication, useUpdateMedication } from '@/hooks';
 import { databaseService, ParsedPrescription } from '@/services';
 import { Medication } from '@/types';
+import {
+  reportPerformanceMetrics,
+  logPerformanceMetrics,
+  showCompatibilityWarning,
+  applyPolyfills,
+  logCompatibilityInfo,
+} from '@/utils';
 
 function AppContent() {
   const [dbInitialized, setDbInitialized] = useState(false);
@@ -41,6 +49,28 @@ function AppContent() {
     };
 
     initializeDatabase();
+  }, []);
+
+  // Initialize performance monitoring and compatibility checks
+  useEffect(() => {
+    // Apply polyfills for older browsers
+    applyPolyfills();
+    
+    // Check browser compatibility and show warnings if needed
+    showCompatibilityWarning();
+    
+    // Set up performance monitoring
+    reportPerformanceMetrics();
+    
+    // Log compatibility and performance info in development
+    if (import.meta.env.DEV) {
+      logCompatibilityInfo();
+      
+      // Log performance metrics after page load
+      window.addEventListener('load', () => {
+        setTimeout(logPerformanceMetrics, 2000);
+      });
+    }
   }, []);
 
   const addDemoMedications = async () => {
@@ -183,6 +213,9 @@ function AppContent() {
       <InstallPrompt />
       <UpdateNotification />
       <OfflineIndicator />
+      
+      {/* Development Dashboard */}
+      <PerformanceDashboard />
       
       <div className="max-w-6xl mx-auto p-4">
         <header className="text-center mb-8">

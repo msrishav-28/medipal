@@ -1,6 +1,6 @@
 import { Caregiver, AccessCode, CaregiverActivity } from '@/types';
 import { caregiverRepository } from './caregiverRepository';
-import { databaseService } from './database';
+import { db } from './database';
 
 export class CaregiverService {
   private static instance: CaregiverService;
@@ -288,13 +288,13 @@ export class CaregiverService {
    */
   async cleanupExpiredCodes(): Promise<number> {
     const now = new Date();
-    const expiredCodes = await databaseService.accessCodes
+    const expiredCodes = await db.accessCodes
       .where('expiresAt')
       .below(now)
       .toArray();
 
     for (const code of expiredCodes) {
-      await databaseService.accessCodes.delete(code.id);
+      await db.accessCodes.delete(code.id);
     }
 
     return expiredCodes.length;

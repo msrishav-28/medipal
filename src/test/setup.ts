@@ -17,6 +17,15 @@ Object.defineProperty(navigator, 'onLine', {
   value: true,
 });
 
+// Mock CSS.supports for jsdom
+if (typeof CSS === 'undefined') {
+  (global as any).CSS = {
+    supports: () => true,
+  };
+} else if (!CSS.supports) {
+  CSS.supports = () => true;
+}
+
 // Clean up after each test
 afterEach(() => {
   // Clear localStorage

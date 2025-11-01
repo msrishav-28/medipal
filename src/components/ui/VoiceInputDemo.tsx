@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { VoiceInput } from './VoiceInput';
 import { VoiceInputButton } from './VoiceInputButton';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
@@ -21,12 +21,15 @@ export function VoiceInputDemo() {
     clearTranscript
   } = useSpeechRecognition();
 
-  // const handleSubmit
+  const handleSubmit = (text: string) => {
+    if (text.trim()) {
+      setMessages([...messages, text.trim()]);
       setMessage('');
     }
   };
 
-  // const handleClear
+  const handleClear = () => {
+    setMessages([]);
     setMessage('');
     clearTranscript();
   };

@@ -110,6 +110,39 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
-    sourcemap: true
+    sourcemap: true,
+    // Code splitting optimization
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks
+          'react-vendor': ['react', 'react-dom'],
+          'query-vendor': ['@tanstack/react-query'],
+          'ui-vendor': ['lucide-react', 'clsx', 'tailwind-merge'],
+          // Feature chunks
+          'ocr': ['tesseract.js'],
+          'pdf': ['jspdf', 'jspdf-autotable'],
+          'database': ['dexie'],
+        },
+        // Optimize chunk file names
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
+      },
+    },
+    // Performance optimizations
+    chunkSizeWarningLimit: 1000,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+      },
+    },
+  },
+  // Performance monitoring
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' },
   }
 })
