@@ -1,0 +1,291 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+
+    /* Design System CSS Custom Properties */
+    /* Primary Colors */
+    --primary-blue: #2E7FD8;
+    --primary-green: #4CAF50;
+    --background: #F8FAFB;
+    --surface: #FFFFFF;
+    
+    /* Semantic Colors */
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+    --info: #3B82F6;
+    
+    /* Neutral Palette */
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --border: #E5E7EB;
+    --disabled: #D1D5DB;
+    
+    /* Gradients */
+    --gradient-success: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    --gradient-primary: linear-gradient(135deg, #2E7FD8 0%, #1D4ED8 100%);
+    
+    /* Spacing System (8px grid) */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+    
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    
+    /* Shadows */
+    --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-card-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  body {
+    @apply font-sans text-neutral-800 bg-neutral-50 min-h-screen;
+  }
+
+  /* Accessibility improvements */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary-500;
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    :root {
+      --tw-text-opacity: 1;
+      --tw-bg-opacity: 1;
+      --text-primary: #000000;
+      --text-secondary: #333333;
+      --border: #000000;
+      --background: #FFFFFF;
+      --surface: #FFFFFF;
+    }
+  }
+
+  /* Accessibility mode class for manual high contrast */
+  .accessibility-mode {
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --border: #000000;
+    --background: #FFFFFF;
+    --surface: #FFFFFF;
+    --primary-blue: #0066CC;
+    --success: #006600;
+    --error: #CC0000;
+    --warning: #CC6600;
+  }
+
+  /* Large font size mode */
+  .large-font-mode {
+    font-size: 125%;
+  }
+
+  .extra-large-font-mode {
+    font-size: 150%;
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Button Components */
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white font-medium py-3 px-6 rounded-xl min-h-touch min-w-touch transition-all duration-200 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white hover:bg-neutral-50 active:bg-neutral-100 text-neutral-700 font-medium py-3 px-6 rounded-xl border border-neutral-200 min-h-touch min-w-touch transition-all duration-200 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-success {
+    @apply bg-success-500 hover:bg-success-600 active:bg-success-700 text-white font-medium py-3 px-6 rounded-xl min-h-touch min-w-touch transition-all duration-200 focus:ring-2 focus:ring-success-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-danger {
+    @apply bg-error-500 hover:bg-error-600 active:bg-error-700 text-white font-medium py-3 px-6 rounded-xl min-h-touch min-w-touch transition-all duration-200 focus:ring-2 focus:ring-error-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent hover:bg-neutral-100 active:bg-neutral-200 text-neutral-700 font-medium py-3 px-6 rounded-xl min-h-touch min-w-touch transition-all duration-200 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Button Sizes */
+  .btn-sm {
+    @apply py-2 px-4 text-sm min-h-10 min-w-16;
+  }
+
+  .btn-lg {
+    @apply py-4 px-8 text-body-large min-h-14 min-w-20;
+  }
+
+  /* Card Components */
+  .card {
+    @apply bg-white rounded-2xl shadow-card border border-neutral-200 p-6 transition-all duration-200;
+  }
+
+  .card-hover {
+    @apply hover:shadow-card-hover cursor-pointer;
+  }
+
+  .card-compact {
+    @apply p-4;
+  }
+
+  .card-spacious {
+    @apply p-8;
+  }
+
+  /* Input Components */
+  .input-field {
+    @apply w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-neutral-400;
+  }
+
+  .input-error {
+    @apply border-error-500 focus:border-error-500 focus:ring-error-500;
+  }
+
+  .input-success {
+    @apply border-success-500 focus:border-success-500 focus:ring-success-500;
+  }
+
+  /* Typography Components */
+  .text-display {
+    @apply text-display text-neutral-800 leading-tight;
+  }
+
+  .text-h1 {
+    @apply text-h1 text-neutral-800 leading-tight;
+  }
+
+  .text-h2 {
+    @apply text-h2 text-neutral-800 leading-snug;
+  }
+
+  .text-h3 {
+    @apply text-h3 text-neutral-800 leading-snug;
+  }
+
+  .text-body-large {
+    @apply text-body-large text-neutral-700 leading-relaxed;
+  }
+
+  .text-body {
+    @apply text-body text-neutral-600 leading-relaxed;
+  }
+
+  .text-caption {
+    @apply text-sm text-neutral-500 leading-normal;
+  }
+
+  /* Layout Components */
+  .container-responsive {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .grid-responsive {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+
+  /* Spacing Utilities */
+  .space-xs { @apply space-y-1; }
+  .space-sm { @apply space-y-2; }
+  .space-md { @apply space-y-4; }
+  .space-lg { @apply space-y-6; }
+  .space-xl { @apply space-y-8; }
+  .space-2xl { @apply space-y-12; }
+
+  /* Touch Target Utilities */
+  .touch-target {
+    @apply min-h-touch min-w-touch;
+  }
+
+  .touch-target-lg {
+    @apply min-h-14 min-w-14;
+  }
+
+  /* Focus Utilities */
+  .focus-ring {
+    @apply focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:outline-none;
+  }
+
+  .focus-ring-error {
+    @apply focus:ring-2 focus:ring-error-500 focus:ring-offset-2 focus:outline-none;
+  }
+
+  .focus-ring-success {
+    @apply focus:ring-2 focus:ring-success-500 focus:ring-offset-2 focus:outline-none;
+  }
+
+  /* Accessibility Utilities */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  .not-sr-only {
+    @apply static w-auto h-auto p-0 m-0 overflow-visible whitespace-normal;
+    clip: auto;
+  }
+
+  .focus\:not-sr-only:focus {
+    @apply not-sr-only;
+  }
+
+  /* Skip link styles */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50;
+    @apply bg-primary-500 text-white px-4 py-2 rounded-lg font-medium;
+    @apply focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+
+  /* High contrast focus indicators */
+  .accessibility-mode *:focus {
+    outline: 3px solid #000000 !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Keyboard navigation indicators */
+  .keyboard-navigation *:focus {
+    @apply ring-2 ring-primary-500 ring-offset-2;
+  }
+
+  /* Safe area insets for mobile devices */
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-inset-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-area-inset-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}
