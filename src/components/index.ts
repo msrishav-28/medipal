@@ -11,7 +11,7 @@ export * from './medication';
 export * from './notification';
 
 // History and analytics components
-export * from './history';
+
 
 // UI components
 export * from './ui';

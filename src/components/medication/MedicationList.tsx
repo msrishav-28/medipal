@@ -70,18 +70,18 @@ const MedicationList: React.FC<MedicationListProps> = ({
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name);
-        
+
         case 'nextDose':
           // Sort by next dose time (active medications first)
           if (!a.isActive && b.isActive) return 1;
           if (a.isActive && !b.isActive) return -1;
-          
+
           if (!a.times || !b.times) return 0;
-          
+
           const getNextTime = (times: string[]) => {
             const now = new Date();
             const currentMinutes = now.getHours() * 60 + now.getMinutes();
-            
+
             for (const time of times) {
               const parts = time.split(':').map(Number);
               const hours = parts[0];
@@ -101,18 +101,18 @@ const MedicationList: React.FC<MedicationListProps> = ({
             if (hours === undefined || minutes === undefined) return 0;
             return (hours * 60 + minutes) + (24 * 60);
           };
-          
+
           return getNextTime(a.times) - getNextTime(b.times);
-        
+
         case 'refillStatus':
           // Sort by pills remaining (ascending - lowest first)
           const aRatio = a.remainingPills / a.totalPills;
           const bRatio = b.remainingPills / b.totalPills;
           return aRatio - bRatio;
-        
+
         case 'dateAdded':
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        
+
         default:
           return 0;
       }
@@ -179,8 +179,8 @@ const MedicationList: React.FC<MedicationListProps> = ({
         </h2>
         {onAddMedication && (
           <Button
-            variant="primary"
-            size="md"
+            variant="default"
+            size="default"
             onClick={onAddMedication}
             className="flex items-center gap-2"
           >
@@ -259,8 +259,8 @@ const MedicationList: React.FC<MedicationListProps> = ({
             </p>
             {onAddMedication && (!searchQuery && filterBy === 'all') && (
               <Button
-                variant="primary"
-                size="md"
+                variant="default"
+                size="default"
                 onClick={onAddMedication}
                 className="mt-4"
               >

@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Card, Button } from '@/components/ui';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { Button } from '@/components/ui/Button';
 import { MedicationReminder } from '@/types';
 import { useBreakpoint } from '@/hooks';
+import { Clock, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils'; // Assuming this exists or src/utils/cn
 
 interface UpcomingRemindersProps {
   reminders: MedicationReminder[];
@@ -27,13 +30,13 @@ export function UpcomingReminders({
   }, []);
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   };
 
   const formatTimeUntil = (scheduledTime: Date) => {
     const now = currentTime;
     const diff = scheduledTime.getTime() - now.getTime();
-    
+
     if (diff <= 0) {
       return 'Now';
     }
@@ -54,7 +57,7 @@ export function UpcomingReminders({
   const getTimeStatus = (scheduledTime: Date) => {
     const now = currentTime;
     const diff = scheduledTime.getTime() - now.getTime();
-    
+
     if (diff <= 0) {
       return 'overdue';
     } else if (diff <= 15 * 60 * 1000) { // 15 minutes
@@ -69,46 +72,47 @@ export function UpcomingReminders({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'overdue':
-        return 'text-error-600 bg-error-50 border-error-200';
+        return 'text-red-500 border-red-500/50 bg-red-500/10';
       case 'soon':
-        return 'text-warning-600 bg-warning-50 border-warning-200';
+        return 'text-amber-500 border-amber-500/50 bg-amber-500/10';
       case 'upcoming':
-        return 'text-primary-600 bg-primary-50 border-primary-200';
+        return 'text-primary border-primary/50 bg-primary/10';
       default:
-        return 'text-neutral-600 bg-neutral-50 border-neutral-200';
+        return 'text-muted-foreground border-white/10 bg-white/5';
     }
   };
 
-  const sortedReminders = [...reminders].sort((a, b) => 
+  const sortedReminders = [...reminders].sort((a, b) =>
     a.scheduledTime.getTime() - b.scheduledTime.getTime()
   );
 
   if (reminders.length === 0) {
     return (
-      <Card className={`p-6 text-center ${className}`}>
-        <div className="w-16 h-16 mx-auto mb-4 bg-neutral-100 rounded-full flex items-center justify-center">
-          <svg className="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+      <GlassCard className={`p-8 text-center flex flex-col items-center justify-center min-h-[200px] ${className}`}>
+        <div className="w-16 h-16 mb-4 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
+          <Clock className="w-8 h-8 text-muted-foreground" />
         </div>
-        <h3 className="text-h3 text-neutral-600 mb-2">No Upcoming Reminders</h3>
-        <p className="text-body text-neutral-500">
+        <h3 className="text-xl font-bold text-foreground mb-2">No Upcoming Reminders</h3>
+        <p className="text-muted-foreground max-w-xs">
           You're all caught up! Your next medication reminders will appear here.
         </p>
-      </Card>
+      </GlassCard>
     );
   }
 
   return (
-    <Card className={`${className}`}>
-      <div className="p-6 border-b border-neutral-200">
-        <h3 className="text-h3 text-neutral-800">Upcoming Reminders</h3>
-        <p className="text-body text-neutral-600 mt-1">
+    <GlassCard className={cn("p-0 overflow-hidden", className)}>
+      <div className="p-6 border-b border-white/10">
+        <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+          <Clock className="w-5 h-5 text-primary" />
+          Upcoming Reminders
+        </h3>
+        <p className="text-sm text-muted-foreground mt-1">
           {reminders.length} reminder{reminders.length > 1 ? 's' : ''} scheduled
         </p>
       </div>
 
-      <div className="divide-y divide-neutral-200">
+      <div className="divide-y divide-white/10">
         {sortedReminders.slice(0, isMobile ? 3 : 5).map((reminder) => {
           const status = getTimeStatus(reminder.scheduledTime);
           const statusColors = getStatusColor(status);
@@ -116,16 +120,15 @@ export function UpcomingReminders({
           return (
             <div
               key={reminder.id}
-              className={`p-4 hover:bg-neutral-50 transition-colors ${
-                onReminderClick ? 'cursor-pointer' : ''
-              }`}
+              className={`p-4 hover:bg-white/5 transition-colors ${onReminderClick ? 'cursor-pointer' : ''
+                }`}
               onClick={() => onReminderClick?.(reminder)}
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     {reminder.pillImage ? (
-                      <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden flex-shrink-0 border border-white/10">
                         <img
                           src={reminder.pillImage}
                           alt={reminder.medicationName}
@@ -133,41 +136,44 @@ export function UpcomingReminders({
                         />
                       </div>
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 8.172V5L8 4z" />
-                        </svg>
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-blue-600/10 flex items-center justify-center flex-shrink-0 border border-white/10 shadow-inner">
+                        <span className="text-lg font-bold text-primary">
+                          {reminder.medicationName.charAt(0)}
+                        </span>
                       </div>
                     )}
 
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-body font-medium text-neutral-800 truncate">
+                      <h4 className="text-base font-semibold text-foreground truncate">
                         {reminder.medicationName}
                       </h4>
-                      <p className="text-sm text-neutral-600">{reminder.dosage}</p>
-                      {reminder.snoozeCount > 0 && (
-                        <p className="text-xs text-warning-600">
-                          Snoozed {reminder.snoozeCount} time{reminder.snoozeCount > 1 ? 's' : ''}
-                        </p>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-muted-foreground">{reminder.dosage}</p>
+                        {reminder.snoozeCount > 0 && (
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-500">
+                            Snoozed {reminder.snoozeCount}x
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-end gap-1 ml-3">
-                  <div className={`px-2 py-1 rounded-full text-xs font-medium border ${statusColors}`}>
+                <div className="flex flex-col items-end gap-1">
+                  <div className={cn("px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider border", statusColors)}>
                     {formatTimeUntil(reminder.scheduledTime)}
                   </div>
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-sm font-mono text-muted-foreground">
                     {formatTime(reminder.scheduledTime)}
                   </p>
                 </div>
               </div>
 
               {reminder.instructions && (
-                <p className="text-sm text-neutral-500 mt-2 ml-13">
+                <div className="flex items-center gap-1.5 mt-2 ml-16 text-xs text-muted-foreground bg-white/5 py-1 px-2 rounded w-fit">
+                  <AlertCircle className="w-3 h-3" />
                   {reminder.instructions}
-                </p>
+                </div>
               )}
             </div>
           );
@@ -175,16 +181,16 @@ export function UpcomingReminders({
       </div>
 
       {reminders.length > (isMobile ? 3 : 5) && (
-        <div className="p-4 border-t border-neutral-200">
+        <div className="p-4 bg-black/20">
           <Button
-            variant="secondary"
+            variant="ghost"
             size="sm"
-            className="w-full text-primary-600 hover:text-primary-700"
+            className="w-full text-primary hover:text-primary hover:bg-primary/10"
           >
             View all {reminders.length} reminders
           </Button>
         </div>
       )}
-    </Card>
+    </GlassCard>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Button, Card, Spinner } from '@/components/ui';
+import { Button, GlassCard, Spinner } from '@/components/ui';
 import { ocrService, ParsedPrescription } from '@/services/ocrService';
 import { cn } from '@/utils/cn';
 
@@ -28,7 +28,7 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [parsedData, setParsedData] = useState<ParsedPrescription | null>(null);
   const [dragActive, setDragActive] = useState(false);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -200,8 +200,8 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
-              variant="primary"
-              size="md"
+              variant="default"
+              size="default"
               onClick={openFileDialog}
             >
               Choose from Gallery
@@ -209,7 +209,7 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
 
             <Button
               variant="secondary"
-              size="md"
+              size="default"
               onClick={openCamera}
             >
               Take Photo
@@ -223,7 +223,7 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
       </div>
 
       {/* Scanning Tips */}
-      <Card className="p-4 bg-primary-50 border-primary-200">
+      <GlassCard className="p-4 bg-primary-50 border-primary-200">
         <h4 className="text-body font-semibold text-primary-800 mb-3">
           📸 Tips for Best Results
         </h4>
@@ -245,7 +245,7 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
             <span>Avoid shadows or glare on the label</span>
           </li>
         </ul>
-      </Card>
+      </GlassCard>
     </div>
   );
 
@@ -324,7 +324,7 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
             <h3 className="text-body font-semibold text-neutral-800 mb-3">
               Extracted Information
             </h3>
-            <Card className="p-4 space-y-3">
+            <GlassCard className="p-4 space-y-3">
               <div>
                 <p className="text-caption text-neutral-500 mb-1">Medication Name</p>
                 <p className="text-body font-medium text-neutral-800">
@@ -370,13 +370,13 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
                   {Math.round(parsedData.confidence)}%
                 </p>
               </div>
-            </Card>
+            </GlassCard>
           </div>
         </div>
 
         {/* Validation Issues */}
         {!validation.isValid && (
-          <Card className="p-4 bg-warning-50 border-warning-200">
+          <GlassCard className="p-4 bg-warning-50 border-warning-200">
             <h4 className="text-body font-semibold text-warning-800 mb-2">
               ⚠️ Please Review
             </h4>
@@ -388,14 +388,14 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
             <p className="text-caption text-warning-700 mt-2">
               You can edit this information in the next step.
             </p>
-          </Card>
+          </GlassCard>
         )}
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
             variant="secondary"
-            size="md"
+            size="default"
             onClick={handleRetry}
             className="flex-1"
           >
@@ -403,8 +403,8 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
           </Button>
 
           <Button
-            variant="primary"
-            size="md"
+            variant="default"
+            size="default"
             onClick={handleUseResults}
             className="flex-1"
           >
@@ -436,7 +436,7 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
         </div>
       )}
 
-      <Card className="p-4 bg-error-50 border-error-200">
+      <GlassCard className="p-4 bg-error-50 border-error-200">
         <h4 className="text-body font-semibold text-error-800 mb-2">
           Troubleshooting Tips
         </h4>
@@ -446,12 +446,12 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
           <li>• Try taking the photo from a different angle</li>
           <li>• Remove any shadows or glare from the label</li>
         </ul>
-      </Card>
+      </GlassCard>
 
       <div className="flex flex-col sm:flex-row gap-3">
         <Button
           variant="secondary"
-          size="md"
+          size="default"
           onClick={onCancel}
           className="flex-1"
         >
@@ -459,15 +459,15 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
         </Button>
 
         <Button
-          variant="primary"
-          size="md"
+          variant="default"
+          size="default"
           onClick={handleRetry}
           className="flex-1"
         >
           Try Again
         </Button>
       </div>
-    </div>
+    </div >
   );
 
   // Hidden file inputs
@@ -498,7 +498,7 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
       {(scanState.status === 'scanning' || scanState.status === 'processing') && renderProcessingInterface()}
       {scanState.status === 'complete' && renderResultsInterface()}
       {scanState.status === 'error' && renderErrorInterface()}
-      
+
       {fileInputs}
 
       {/* Cancel Button (always visible) */}
@@ -506,7 +506,7 @@ const PrescriptionScanner: React.FC<PrescriptionScannerProps> = ({
         <div className="mt-8 text-center">
           <Button
             variant="secondary"
-            size="md"
+            size="default"
             onClick={onCancel}
           >
             Cancel Scanning

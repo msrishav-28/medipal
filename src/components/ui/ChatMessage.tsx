@@ -1,6 +1,6 @@
 import { ChatMessage as ChatMessageType, ChatAction } from '@/services/aiService';
 import { cn } from '@/utils/cn';
-import Button from './Button';
+import { Button } from './Button';
 
 export interface ChatMessageProps {
   message: ChatMessageType;
@@ -24,8 +24,8 @@ export function ChatMessage({ message, onActionClick, className }: ChatMessagePr
           <div
             className={cn(
               'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium',
-              isUser 
-                ? 'bg-primary-blue text-white' 
+              isUser
+                ? 'bg-primary-blue text-white'
                 : 'bg-green-100 text-green-700'
             )}
           >
@@ -45,7 +45,7 @@ export function ChatMessage({ message, onActionClick, className }: ChatMessagePr
             )}
           >
             <div className="whitespace-pre-wrap">{message.content}</div>
-            
+
             {/* Confidence indicator for AI messages */}
             {isAssistant && message.metadata?.confidence !== undefined && (
               <div className="mt-2 text-xs opacity-70">

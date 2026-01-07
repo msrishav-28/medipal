@@ -32,7 +32,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
       const filtered = COMMON_MEDICATIONS.filter(med =>
         med.toLowerCase().includes(formData.name.toLowerCase())
       ).slice(0, 5); // Limit to 5 suggestions
-      
+
       setFilteredSuggestions(filtered);
       setShowSuggestions(filtered.length > 0 && formData.name !== filtered[0]);
     } else {
@@ -64,7 +64,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
 
   const handleTotalPillsChange = (value: string) => {
     const numValue = parseInt(value) || 0;
-    onUpdate({ 
+    onUpdate({
       totalPills: numValue,
       remainingPills: Math.min(formData.remainingPills, numValue)
     });
@@ -83,24 +83,29 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
   return (
     <div className="space-y-6">
       {/* Medication Name with Autocomplete */}
-      <div className="relative">
-        <Input
-          label="Medication Name *"
-          value={formData.name}
-          onChange={(e) => handleMedicationNameChange(e.target.value)}
-          placeholder="e.g., Metformin, Lisinopril"
-          {...(errors.name ? { error: errors.name } : {})}
-          onFocus={() => {
-            if (filteredSuggestions.length > 0) {
-              setShowSuggestions(true);
-            }
-          }}
-          onBlur={() => {
-            // Delay hiding suggestions to allow clicking
-            setTimeout(() => setShowSuggestions(false), 200);
-          }}
-        />
-        
+      <div>
+        <label className="block text-body font-medium text-neutral-700 mb-2">
+          Medication Name *
+        </label>
+        <div className="relative">
+          <Input
+            value={formData.name}
+            onChange={(e) => handleMedicationNameChange(e.target.value)}
+            placeholder="e.g., Metformin, Lisinopril"
+            onFocus={() => {
+              if (filteredSuggestions.length > 0) {
+                setShowSuggestions(true);
+              }
+            }}
+            onBlur={() => {
+              setTimeout(() => setShowSuggestions(false), 200);
+            }}
+          />
+          {errors.name && (
+            <p className="text-caption text-error-600 mt-1">{errors.name}</p>
+          )}
+        </div>
+
         {/* Autocomplete Suggestions */}
         {showSuggestions && (
           <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -120,13 +125,19 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
 
       {/* Dosage and Form */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          label="Dosage *"
-          value={formData.dosage}
-          onChange={(e) => handleDosageChange(e.target.value)}
-          placeholder="e.g., 500mg, 10ml"
-          {...(errors.dosage ? { error: errors.dosage } : {})}
-        />
+        <div>
+          <label className="block text-body font-medium text-neutral-700 mb-2">
+            Dosage *
+          </label>
+          <Input
+            value={formData.dosage}
+            onChange={(e) => handleDosageChange(e.target.value)}
+            placeholder="e.g., 500mg, 10ml"
+          />
+          {errors.dosage && (
+            <p className="text-caption text-error-600 mt-1">{errors.dosage}</p>
+          )}
+        </div>
 
         <div>
           <label className="block text-body font-medium text-neutral-700 mb-2">
@@ -167,38 +178,56 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
         <h3 className="text-h3 font-semibold text-neutral-800 mb-4">
           Pill Count & Refill Information
         </h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Input
-            label="Total Pills *"
-            type="number"
-            value={formData.totalPills.toString()}
-            onChange={(e) => handleTotalPillsChange(e.target.value)}
-            placeholder="30"
-            min="1"
-            {...(errors.totalPills ? { error: errors.totalPills } : {})}
-          />
+          <div>
+            <label className="block text-body font-medium text-neutral-700 mb-2">
+              Total Pills *
+            </label>
+            <Input
+              type="number"
+              value={formData.totalPills.toString()}
+              onChange={(e) => handleTotalPillsChange(e.target.value)}
+              placeholder="30"
+              min="1"
+            />
+            {errors.totalPills && (
+              <p className="text-caption text-error-600 mt-1">{errors.totalPills}</p>
+            )}
+          </div>
 
-          <Input
-            label="Pills Remaining *"
-            type="number"
-            value={formData.remainingPills.toString()}
-            onChange={(e) => handleRemainingPillsChange(e.target.value)}
-            placeholder="30"
-            min="0"
-            max={formData.totalPills}
-            {...(errors.remainingPills ? { error: errors.remainingPills } : {})}
-          />
+          <div>
+            <label className="block text-body font-medium text-neutral-700 mb-2">
+              Pills Remaining *
+            </label>
+            <Input
+              type="number"
+              value={formData.remainingPills.toString()}
+              onChange={(e) => handleRemainingPillsChange(e.target.value)}
+              placeholder="30"
+              min="0"
+              max={formData.totalPills}
+            />
+            {errors.remainingPills && (
+              <p className="text-caption text-error-600 mt-1">{errors.remainingPills}</p>
+            )}
+          </div>
 
-          <Input
-            label="Refill Reminder (days) *"
-            type="number"
-            value={formData.refillReminder.toString()}
-            onChange={(e) => handleRefillReminderChange(e.target.value)}
-            placeholder="7"
-            min="1"
-            {...(errors.refillReminder ? { error: errors.refillReminder } : {})}
-          />
+          <div>
+            <label className="block text-body font-medium text-neutral-700 mb-2">
+              Refill Reminder (days) *
+            </label>
+            <Input
+              type="number"
+              value={formData.refillReminder.toString()}
+              onChange={(e) => handleRefillReminderChange(e.target.value)}
+              placeholder="7"
+              min="1"
+            />
+            {errors.refillReminder && (
+              <p className="text-caption text-error-600 mt-1">{errors.refillReminder}</p>
+            )}
+          </div>
         </div>
 
         <div className="mt-4">

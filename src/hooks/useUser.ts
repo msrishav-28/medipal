@@ -34,7 +34,7 @@ export function useUsers() {
 
 // Hook for creating a new user
 export function useCreateUser() {
-  // const queryClient
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) =>
       userRepository.create(userData),
@@ -61,11 +61,11 @@ export function useCreateUser() {
 
 // Hook for updating user information
 export function useUpdateUser() {
-  // const queryClient
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, updates }: { 
-      id: string; 
-      updates: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>> 
+    mutationFn: ({ id, updates }: {
+      id: string;
+      updates: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>
     }) => userRepository.update(id, updates),
     onSuccess: (updatedUser, { id }) => {
       if (updatedUser) {
@@ -94,12 +94,12 @@ export function useUpdateUser() {
 
 // Hook for updating user preferences specifically
 export function useUpdateUserPreferences() {
-  // const queryClient
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, preferences }: { 
-      id: string; 
-      preferences: Partial<User['preferences']> 
-    }) => userRepository.update(id, { preferences }),
+    mutationFn: ({ id, preferences }: {
+      id: string;
+      preferences: Partial<User['preferences']>
+    }) => userRepository.update(id, { preferences: preferences as any }),
     onSuccess: (updatedUser, { id }) => {
       if (updatedUser) {
         // Update the specific user in cache
@@ -124,16 +124,23 @@ export function useUpdateUserPreferences() {
       await queryClient.cancelQueries({ queryKey: queryKeys.users.current });
 
       // Snapshot the previous values
-      // const previousUser
-      // const previousCurrentUser
+      const previousUser = queryClient.getQueryData<User>(queryKeys.users.byId(id));
+      const previousCurrentUser = queryClient.getQueryData<User>(queryKeys.users.current);
+
       // Optimistically update the cache
       if (previousUser) {
-        // const optimisticUser
+        const optimisticUser = {
+          ...previousUser,
+          preferences: {
+            ...previousUser.preferences,
+            ...preferences
+          }
+        };
+
         queryClient.setQueryData(queryKeys.users.byId(id), optimisticUser);
-        
+
         // Update current user if it's the same user
-        // const currentUser
-        if (currentUser?.id === id) {
+        if (previousCurrentUser?.id === id) {
           queryClient.setQueryData(queryKeys.users.current, optimisticUser);
         }
       }
@@ -142,7 +149,7 @@ export function useUpdateUserPreferences() {
       return { previousUser, previousCurrentUser };
     },
     // If the mutation fails, use the context returned from onMutate to roll back
-    onError: (err, { id }, context) => {
+    onError: (_err, { id }, context) => {
       if (context?.previousUser) {
         queryClient.setQueryData(queryKeys.users.byId(id), context.previousUser);
       }
@@ -155,7 +162,7 @@ export function useUpdateUserPreferences() {
 
 // Hook for deleting a user
 export function useDeleteUser() {
-  // const queryClient
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => userRepository.delete(id),
     onSuccess: (_, id) => {

@@ -1,7 +1,9 @@
 import React from 'react';
 import { Medication } from '@/types';
-import { Card, Button, Badge } from '@/components/ui';
-import { cn } from '@/utils/cn';
+import { Button, Badge } from '@/components/ui';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 interface MedicationCardProps {
   medication: Medication;
@@ -42,18 +44,18 @@ const MedicationCard: React.FC<MedicationCardProps> = ({
     const touch = e.targetTouches[0];
     if (!touch) return;
     setTouchEnd(touch.clientX);
-    
+
     if (!touchStart) return;
-    
+
     const distance = touchStart - touch.clientX;
     const isSwipe = Math.abs(distance) > minSwipeDistance;
-    
+
     setIsSwipeActive(isSwipe);
   };
 
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
@@ -72,24 +74,24 @@ const MedicationCard: React.FC<MedicationCardProps> = ({
 
   const getNextDoseTime = () => {
     if (!medication.times || medication.times.length === 0) return null;
-    
+
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();
-    
+
     for (const time of medication.times) {
       const parts = time.split(':').map(Number);
       const hours = parts[0];
       const minutes = parts[1];
-      
+
       if (hours === undefined || minutes === undefined) continue;
-      
+
       const timeInMinutes = hours * 60 + minutes;
-      
+
       if (timeInMinutes > currentTime) {
         return time;
       }
     }
-    
+
     // If no time today, return first time tomorrow
     return medication.times[0];
   };
@@ -100,70 +102,81 @@ const MedicationCard: React.FC<MedicationCardProps> = ({
 
   const getStatusBadge = () => {
     if (!medication.isActive) {
-      return <Badge variant="secondary">Inactive</Badge>;
+      return <Badge variant="secondary" className="backdrop-blur-md bg-neutral-200/50">Inactive</Badge>;
     }
-    
+
     if (medication.remainingPills <= medication.refillReminder) {
-      return <Badge variant="warning">Refill Soon</Badge>;
+      return <Badge variant="warning" className="animate-pulse shadow-neon-amber">Refill Soon</Badge>;
     }
-    
+
     if (medication.remainingPills === 0) {
-      return <Badge variant="error">Out of Stock</Badge>;
+      return <Badge variant="error" className="shadow-neon-red">Out of Stock</Badge>;
     }
-    
+
     return null;
   };
 
   const nextDose = getNextDoseTime();
   const statusBadge = getStatusBadge();
 
-  const cardClasses = cn(
-    'medication-card transition-transform duration-200',
-    {
-      'p-3': size === 'compact',
-      'p-4': size === 'standard',
-      'p-6': size === 'expanded',
-    },
-    isSwipeActive && 'scale-95',
-    className
-  );
+  // Determine variant based on next dose proximity or status
+  const cardVariant = medication.remainingPills === 0 ? 'alert' : (medication.isActive ? 'active' : 'default');
 
   return (
-    <Card
-      className={cardClasses}
-      hover={showActions}
+    <GlassCard
+      variant={cardVariant}
+      className={cn(
+        'transition-all duration-300 relative group',
+        {
+          'p-4': size === 'compact',
+          'p-6': size === 'standard',
+          'p-8': size === 'expanded',
+        },
+        isSwipeActive && 'scale-95 opacity-80',
+        className
+      )}
+      hoverEffect={showActions}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="flex items-start justify-between gap-3">
-        {/* Medication Image */}
+      {/* Glow Element for Active Cards */}
+      {medication.isActive && (
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/20 blur-[60px] rounded-full pointer-events-none group-hover:bg-primary/30 transition-all duration-500" />
+      )}
+
+      <div className="flex items-start justify-between gap-4 relative z-10">
+        {/* Medication Image - Neumorphic Container */}
         <div className="flex-shrink-0">
           {medication.pillImage ? (
-            <img
-              src={medication.pillImage}
-              alt={`${medication.name} pill`}
-              className={cn(
-                'rounded-lg object-cover',
-                {
-                  'w-12 h-12': size === 'compact',
-                  'w-16 h-16': size === 'standard',
-                  'w-20 h-20': size === 'expanded',
-                }
-              )}
-            />
+            <div className="relative rounded-2xl overflow-hidden shadow-inner border border-white/10">
+              <img
+                src={medication.pillImage}
+                alt={`${medication.name} pill`}
+                className={cn(
+                  'object-cover',
+                  {
+                    'w-14 h-14': size === 'compact',
+                    'w-20 h-20': size === 'standard',
+                    'w-24 h-24': size === 'expanded',
+                  }
+                )}
+              />
+              <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-2xl" />
+            </div>
+
           ) : (
             <div
               className={cn(
-                'bg-primary-100 rounded-lg flex items-center justify-center',
+                'bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)]',
                 {
-                  'w-12 h-12': size === 'compact',
-                  'w-16 h-16': size === 'standard',
-                  'w-20 h-20': size === 'expanded',
+                  'w-14 h-14': size === 'compact',
+                  'w-20 h-20': size === 'standard',
+                  'w-24 h-24': size === 'expanded',
                 }
               )}
             >
-              <span className="text-primary-600 font-semibold text-lg">
+              <span className="text-primary font-bold text-xl font-heading">
                 {medication.name.charAt(0).toUpperCase()}
               </span>
             </div>
@@ -176,11 +189,11 @@ const MedicationCard: React.FC<MedicationCardProps> = ({
             <div className="min-w-0 flex-1">
               <h3
                 className={cn(
-                  'font-semibold text-neutral-800 truncate',
+                  'font-bold text-foreground truncate font-heading tracking-tight',
                   {
-                    'text-body': size === 'compact',
-                    'text-body-large': size === 'standard',
-                    'text-h3': size === 'expanded',
+                    'text-lg': size === 'compact',
+                    'text-xl': size === 'standard',
+                    'text-2xl': size === 'expanded',
                   }
                 )}
               >
@@ -188,19 +201,19 @@ const MedicationCard: React.FC<MedicationCardProps> = ({
               </h3>
               <p
                 className={cn(
-                  'text-neutral-600 mt-1',
+                  'text-muted-foreground mt-1 font-medium',
                   {
-                    'text-caption': size === 'compact',
-                    'text-body': size === 'standard' || size === 'expanded',
+                    'text-sm': size === 'compact',
+                    'text-base': size === 'standard' || size === 'expanded',
                   }
                 )}
               >
                 {formatDosage()}
               </p>
             </div>
-            
+
             {statusBadge && (
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 ml-2">
                 {statusBadge}
               </div>
             )}
@@ -208,22 +221,17 @@ const MedicationCard: React.FC<MedicationCardProps> = ({
 
           {/* Schedule Info */}
           {size !== 'compact' && (
-            <div className="mt-3 space-y-1">
+            <div className="mt-4 space-y-1.5 p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
               {nextDose && (
-                <p className="text-body text-neutral-600">
-                  Next dose: <span className="font-medium text-neutral-800">{nextDose}</span>
+                <p className="text-base text-neutral-600 dark:text-neutral-300 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  Next dose: <span className="font-bold text-primary font-heading tracking-wide text-lg">{nextDose}</span>
                 </p>
               )}
-              
+
               {medication.scheduleType === 'time-based' && medication.times && (
-                <p className="text-caption text-neutral-500">
+                <p className="text-sm text-muted-foreground pl-4">
                   {medication.times.length} time{medication.times.length !== 1 ? 's' : ''} daily
-                </p>
-              )}
-              
-              {medication.scheduleType === 'interval-based' && medication.interval && (
-                <p className="text-caption text-neutral-500">
-                  Every {medication.interval} hours
                 </p>
               )}
             </div>
@@ -231,35 +239,39 @@ const MedicationCard: React.FC<MedicationCardProps> = ({
 
           {/* Instructions */}
           {size === 'expanded' && medication.instructions && (
-            <div className="mt-3">
-              <p className="text-body text-neutral-600">
-                {medication.instructions}
+            <div className="mt-4">
+              <p className="text-base text-neutral-600 dark:text-neutral-300 italic">
+                "{medication.instructions}"
               </p>
             </div>
           )}
 
-          {/* Pills Remaining */}
+          {/* Pills Remaining - Modern Progress Bar */}
           {size !== 'compact' && (
-            <div className="mt-3">
-              <div className="flex items-center justify-between text-caption text-neutral-500">
-                <span>Pills remaining</span>
-                <span className="font-medium">
+            <div className="mt-4">
+              <div className="flex items-center justify-between text-xs uppercase tracking-wider font-bold text-muted-foreground mb-1.5">
+                <span>Supply</span>
+                <span className={cn(
+                  "text-primary",
+                  medication.remainingPills <= medication.refillReminder && "text-warning",
+                  medication.remainingPills === 0 && "text-destructive"
+                )}>
                   {medication.remainingPills} / {medication.totalPills}
                 </span>
               </div>
-              <div className="mt-1 w-full bg-neutral-200 rounded-full h-2">
-                <div
+              <div className="w-full bg-neutral-200/50 dark:bg-neutral-800/50 rounded-full h-2.5 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.max(0, (medication.remainingPills / medication.totalPills) * 100)}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
                   className={cn(
-                    'h-2 rounded-full transition-all duration-300',
+                    'h-full rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]',
                     {
-                      'bg-success-500': medication.remainingPills > medication.refillReminder,
-                      'bg-warning-500': medication.remainingPills <= medication.refillReminder && medication.remainingPills > 0,
-                      'bg-error-500': medication.remainingPills === 0,
+                      'bg-primary': medication.remainingPills > medication.refillReminder,
+                      'bg-warning': medication.remainingPills <= medication.refillReminder && medication.remainingPills > 0,
+                      'bg-destructive': medication.remainingPills === 0,
                     }
                   )}
-                  style={{
-                    width: `${Math.max(0, (medication.remainingPills / medication.totalPills) * 100)}%`,
-                  }}
                 />
               </div>
             </div>
@@ -267,42 +279,33 @@ const MedicationCard: React.FC<MedicationCardProps> = ({
         </div>
       </div>
 
-      {/* Action Buttons */}
+      {/* Action Buttons - Large Touch Targets */}
       {showActions && size !== 'compact' && (
-        <div className="flex gap-2 mt-4">
+        <div className="flex gap-3 mt-6 relative z-10">
           {onTaken && medication.isActive && (
             <Button
-              variant="success"
-              size="sm"
-              onClick={() => onTaken(medication.id)}
-              className="flex-1"
+              variant="default"
+              size="lg"
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onTaken(medication.id); }}
+              className="flex-1 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all text-base font-semibold"
             >
-              Mark as Taken
+              Mark Taken
             </Button>
           )}
-          
+
           {onEdit && (
             <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => onEdit(medication.id)}
-              className="flex-1"
+              variant="outline"
+              size="lg"
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onEdit(medication.id); }}
+              className="flex-1 bg-white/50 dark:bg-black/50 hover:bg-white/80"
             >
               Edit
             </Button>
           )}
         </div>
       )}
-
-      {/* Swipe Hint for Mobile */}
-      {(onSwipeLeft || onSwipeRight) && size !== 'compact' && (
-        <div className="mt-2 text-center">
-          <p className="text-caption text-neutral-400">
-            Swipe left for options, right to mark taken
-          </p>
-        </div>
-      )}
-    </Card>
+    </GlassCard>
   );
 };
 

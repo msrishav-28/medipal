@@ -260,7 +260,7 @@ export function VoiceSettings({ className = '' }: VoiceSettingsProps) {
         {hasChanges && (
           <div className="pt-4 border-t border-neutral-200">
             <Button
-              variant="primary"
+              variant="default"
               onClick={handleSave}
               disabled={isSaving}
               className="w-full"

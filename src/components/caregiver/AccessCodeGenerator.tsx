@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { caregiverService } from '../../services/caregiverService';
-import Card from '../ui/Card';
-import Button from '../ui/Button';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { Button } from '@/components/ui/Button';
 import { AccessCode } from '../../types';
+import { Copy, Share2, Mail, MessageSquare, X, RefreshCw, Key } from 'lucide-react';
 
 interface AccessCodeGeneratorProps {
   patientId: string;
@@ -25,12 +26,12 @@ export function AccessCodeGenerator({
       setLoading(true);
       const code = await caregiverService.createAccessCode(patientId);
       setAccessCode(code);
-      
+
       // Generate share link
       const baseUrl = window.location.origin;
       const link = `${baseUrl}/caregiver/register?code=${code.code}`;
       setShareLink(link);
-      
+
       onCodeGenerated();
     } catch (error) {
       console.error('Error generating access code:', error);
@@ -68,32 +69,31 @@ This code will expire in 24 hours.`;
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-md">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <GlassCard className="w-full max-w-md relative overflow-hidden">
         <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">
-              Generate Caregiver Access Code
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <Key className="w-5 h-5 text-primary" />
+              Generate Caregiver Code
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-white/10 rounded-full"
               aria-label="Close"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           {!accessCode ? (
-            <div className="space-y-4">
-              <p className="text-gray-600">
+            <div className="space-y-6">
+              <p className="text-muted-foreground">
                 Generate a one-time access code to share with your caregiver. They can use this code
                 to register and help you manage your medications.
               </p>
-              <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
-                <p className="text-sm text-yellow-800">
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+                <p className="text-sm text-amber-500 leading-relaxed">
                   <strong>Note:</strong> The access code will expire in 24 hours and can only be used once.
                 </p>
               </div>
@@ -106,30 +106,31 @@ This code will expire in 24 hours.`;
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded p-4">
-                <label className="text-sm font-medium text-gray-700 block mb-2">
+            <div className="space-y-6">
+              <div className="bg-primary/10 border border-primary/20 rounded-xl p-6 text-center">
+                <label className="text-sm font-medium text-muted-foreground block mb-3 uppercase tracking-wider">
                   Access Code
                 </label>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-white border rounded px-3 py-2 text-2xl font-mono font-bold text-center">
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <code className="bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-3xl font-mono font-bold text-primary tracking-[0.2em]">
                     {accessCode.code}
                   </code>
-                  <Button
-                    onClick={() => copyToClipboard(accessCode.code)}
-                    variant="secondary"
-                    size="sm"
-                  >
-                    {copied ? 'Copied!' : 'Copy'}
-                  </Button>
                 </div>
-                <p className="text-xs text-gray-600 mt-2">
-                  Expires: {new Date(accessCode.expiresAt).toLocaleString()}
+                <Button
+                  onClick={() => copyToClipboard(accessCode.code)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-primary hover:text-primary hover:bg-primary/10 h-8"
+                >
+                  {copied ? 'Copied!' : <><Copy className="w-3 h-3 mr-2" /> Copy Code</>}
+                </Button>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Expires: {new Date(accessCode.expiresAt).toLocaleTimeString()}
                 </p>
               </div>
 
-              <div className="bg-gray-50 border border-gray-200 rounded p-4">
-                <label className="text-sm font-medium text-gray-700 block mb-2">
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-muted-foreground block">
                   Registration Link
                 </label>
                 <div className="flex items-center gap-2">
@@ -137,37 +138,39 @@ This code will expire in 24 hours.`;
                     type="text"
                     value={shareLink}
                     readOnly
-                    className="flex-1 bg-white border rounded px-3 py-2 text-sm"
+                    className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-muted-foreground font-mono truncate"
                   />
                   <Button
                     onClick={() => copyToClipboard(shareLink)}
                     variant="secondary"
                     size="sm"
                   >
-                    Copy
+                    <Copy className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700">Share via:</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button onClick={shareViaEmail} variant="secondary" className="w-full">
-                    Email
+              <div className="space-y-3 pt-2 border-t border-white/10">
+                <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <Share2 className="w-4 h-4" /> Share via:
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button onClick={shareViaEmail} variant="outline" className="w-full gap-2">
+                    <Mail className="w-4 h-4" /> Email
                   </Button>
-                  <Button onClick={shareViaSMS} variant="secondary" className="w-full">
-                    SMS
+                  <Button onClick={shareViaSMS} variant="outline" className="w-full gap-2">
+                    <MessageSquare className="w-4 h-4" /> SMS
                   </Button>
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-3 pt-4">
                 <Button
                   onClick={generateCode}
-                  variant="secondary"
-                  className="flex-1"
+                  variant="ghost"
+                  className="flex-1 text-muted-foreground hover:text-foreground"
                 >
-                  Generate New Code
+                  <RefreshCw className="w-4 h-4 mr-2" /> New Code
                 </Button>
                 <Button
                   onClick={onClose}
@@ -179,7 +182,7 @@ This code will expire in 24 hours.`;
             </div>
           )}
         </div>
-      </Card>
+      </GlassCard>
     </div>
   );
 }

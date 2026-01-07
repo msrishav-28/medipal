@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Card, Button, Badge } from '@/components/ui';
 import { IntakeConfirmation } from '@/components/medication';
-import { 
-  useTodaysIntakeRecords, 
-  useActiveMedications, 
+import {
+  useTodaysIntakeRecords,
+  useActiveMedications,
   useStreakData,
-  useAdherenceStatistics 
+  useAdherenceStatistics
 } from '@/hooks';
 import { Medication, IntakeRecord } from '@/types';
 import { cn } from '@/utils/cn';
@@ -43,7 +43,7 @@ const MedicationDashboard: React.FC<MedicationDashboardProps> = ({
     const taken = todaysRecords.filter(r => r.status === 'taken').length;
     const missed = todaysRecords.filter(r => r.status === 'missed').length;
     const skipped = todaysRecords.filter(r => r.status === 'skipped').length;
-    const pending = todaysRecords.filter(r => 
+    const pending = todaysRecords.filter(r =>
       new Date() < r.scheduledTime && r.status !== 'taken').length;
 
     return {
@@ -62,7 +62,7 @@ const MedicationDashboard: React.FC<MedicationDashboardProps> = ({
 
     const now = new Date();
     const fourHoursFromNow = new Date(now.getTime() + 4 * 60 * 60 * 1000);
-    
+
     const upcoming: UpcomingReminder[] = [];
 
     medications.forEach(medication => {
@@ -71,7 +71,7 @@ const MedicationDashboard: React.FC<MedicationDashboardProps> = ({
       medication.times.forEach(timeStr => {
         const [hours, minutes] = timeStr.split(':').map(Number);
         if (hours === undefined || minutes === undefined) return;
-        
+
         const scheduledTime = new Date();
         scheduledTime.setHours(hours, minutes, 0, 0);
 
@@ -82,7 +82,7 @@ const MedicationDashboard: React.FC<MedicationDashboardProps> = ({
 
         // Only include if within next 4 hours
         if (scheduledTime <= fourHoursFromNow) {
-          const record = todaysRecords.find(r => 
+          const record = todaysRecords.find(r =>
             r.medicationId === medication.id &&
             Math.abs(r.scheduledTime.getTime() - scheduledTime.getTime()) < 60000 // Within 1 minute
           );
@@ -100,10 +100,10 @@ const MedicationDashboard: React.FC<MedicationDashboardProps> = ({
   }, [medications, todaysRecords]);
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: true 
+      hour12: true
     });
   };
 
@@ -162,7 +162,7 @@ const MedicationDashboard: React.FC<MedicationDashboardProps> = ({
               {getGreeting()}!
             </h1>
             <p className="text-body text-neutral-600">
-              {todaysProgress 
+              {todaysProgress
                 ? `${todaysProgress.taken} of ${todaysProgress.totalScheduled} medications taken today`
                 : 'Loading your medication schedule...'
               }
@@ -188,7 +188,7 @@ const MedicationDashboard: React.FC<MedicationDashboardProps> = ({
           <h2 className="text-h2 font-semibold text-neutral-800 mb-4">
             Today's Progress
           </h2>
-          
+
           <div className="flex items-center justify-center mb-6">
             <div className="relative w-40 h-40">
               <svg className="w-40 h-40 transform -rotate-90" viewBox="0 0 160 160">
@@ -208,11 +208,11 @@ const MedicationDashboard: React.FC<MedicationDashboardProps> = ({
                   r="70"
                   fill="none"
                   stroke={
-                    todaysProgress.completionRate >= 90 
-                      ? '#10B981' 
-                      : todaysProgress.completionRate >= 70 
-                      ? '#F59E0B' 
-                      : '#EF4444'
+                    todaysProgress.completionRate >= 90
+                      ? '#10B981'
+                      : todaysProgress.completionRate >= 70
+                        ? '#F59E0B'
+                        : '#EF4444'
                   }
                   strokeWidth="12"
                   strokeLinecap="round"
@@ -336,7 +336,7 @@ const MedicationDashboard: React.FC<MedicationDashboardProps> = ({
                 {reminder.record?.status !== 'taken' && (
                   <div className="flex-shrink-0">
                     <Button
-                      variant="primary"
+                      variant="default"
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -359,7 +359,7 @@ const MedicationDashboard: React.FC<MedicationDashboardProps> = ({
           <h2 className="text-h2 font-semibold text-neutral-800 mb-4">
             This Week's Performance
           </h2>
-          
+
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="text-center p-4 bg-gradient-to-br from-success-50 to-success-100 rounded-lg">
               <div className="text-2xl font-bold text-success-700 mb-1">
@@ -381,13 +381,13 @@ const MedicationDashboard: React.FC<MedicationDashboardProps> = ({
 
           <div className="text-center">
             <p className="text-body text-neutral-600">
-              {statistics.adherenceRate >= 95 
+              {statistics.adherenceRate >= 95
                 ? "Outstanding performance! Keep up the excellent work! 🏆"
                 : statistics.adherenceRate >= 85
-                ? "Great job this week! You're doing excellent! 🌟"
-                : statistics.adherenceRate >= 70
-                ? "Good progress! Keep building that routine! 💪"
-                : "Every day is a new opportunity to improve! 🎯"
+                  ? "Great job this week! You're doing excellent! 🌟"
+                  : statistics.adherenceRate >= 70
+                    ? "Good progress! Keep building that routine! 💪"
+                    : "Every day is a new opportunity to improve! 🎯"
               }
             </p>
           </div>
@@ -399,7 +399,7 @@ const MedicationDashboard: React.FC<MedicationDashboardProps> = ({
         <h2 className="text-h2 font-semibold text-neutral-800 mb-4">
           Quick Actions
         </h2>
-        
+
         <div className="grid grid-cols-2 gap-3">
           <Button variant="secondary" className="h-12">
             📊 View Full History

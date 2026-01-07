@@ -222,31 +222,43 @@ const PrescriptionReview: React.FC<PrescriptionReviewProps> = ({
           <h2 className="text-h2 font-semibold text-neutral-800 mb-4">
             Medication Information
           </h2>
-          
+
           <div className="space-y-6">
             {/* Basic Info */}
             <Card className="p-4">
               <h3 className="text-body font-semibold text-neutral-800 mb-4">
                 Basic Information
               </h3>
-              
+
               <div className="space-y-4">
-                <Input
-                  label="Medication Name *"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder="e.g., Metformin"
-                  {...(errors.name ? { error: errors.name } : {})}
-                />
+                <div>
+                  <label className="block text-body font-medium text-neutral-700 mb-2">
+                    Medication Name *
+                  </label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    placeholder="e.g., Metformin"
+                  />
+                  {errors.name && (
+                    <p className="text-caption text-error-600 mt-1">{errors.name}</p>
+                  )}
+                </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    label="Dosage *"
-                    value={formData.dosage}
-                    onChange={(e) => handleInputChange('dosage', e.target.value)}
-                    placeholder="e.g., 500mg"
-                    {...(errors.dosage ? { error: errors.dosage } : {})}
-                  />
+                  <div>
+                    <label className="block text-body font-medium text-neutral-700 mb-2">
+                      Dosage *
+                    </label>
+                    <Input
+                      value={formData.dosage}
+                      onChange={(e) => handleInputChange('dosage', e.target.value)}
+                      placeholder="e.g., 500mg"
+                    />
+                    {errors.dosage && (
+                      <p className="text-caption text-error-600 mt-1">{errors.dosage}</p>
+                    )}
+                  </div>
 
                   <div>
                     <label className="block text-body font-medium text-neutral-700 mb-2">
@@ -366,16 +378,22 @@ const PrescriptionReview: React.FC<PrescriptionReviewProps> = ({
                     )}
                   </div>
                 ) : (
-                  <Input
-                    label="Interval (hours)"
-                    type="number"
-                    value={formData.interval.toString()}
-                    onChange={(e) => handleInputChange('interval', parseInt(e.target.value) || 8)}
-                    placeholder="8"
-                    min="1"
-                    max="24"
-                    {...(errors.interval ? { error: errors.interval } : {})}
-                  />
+                  <div>
+                    <label className="block text-body font-medium text-neutral-700 mb-2">
+                      Interval (hours)
+                    </label>
+                    <Input
+                      type="number"
+                      value={formData.interval.toString()}
+                      onChange={(e) => handleInputChange('interval', parseInt(e.target.value) || 8)}
+                      placeholder="8"
+                      min="1"
+                      max="24"
+                    />
+                    {errors.interval && (
+                      <p className="text-caption text-error-600 mt-1">{errors.interval}</p>
+                    )}
+                  </div>
                 )}
               </div>
             </Card>
@@ -387,32 +405,48 @@ const PrescriptionReview: React.FC<PrescriptionReviewProps> = ({
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Input
-                  label="Total Pills *"
-                  type="number"
-                  value={formData.totalPills.toString()}
-                  onChange={(e) => handleInputChange('totalPills', parseInt(e.target.value) || 0)}
-                  min="1"
-                  {...(errors.totalPills ? { error: errors.totalPills } : {})}
-                />
+                <div>
+                  <label className="block text-body font-medium text-neutral-700 mb-2">
+                    Total Pills *
+                  </label>
+                  <Input
+                    type="number"
+                    value={formData.totalPills.toString()}
+                    onChange={(e) => handleInputChange('totalPills', parseInt(e.target.value) || 0)}
+                    min="1"
+                  />
+                  {errors.totalPills && (
+                    <p className="text-caption text-error-600 mt-1">{errors.totalPills}</p>
+                  )}
+                </div>
 
-                <Input
-                  label="Pills Remaining *"
-                  type="number"
-                  value={formData.remainingPills.toString()}
-                  onChange={(e) => handleInputChange('remainingPills', parseInt(e.target.value) || 0)}
-                  min="0"
-                  max={formData.totalPills}
-                  {...(errors.remainingPills ? { error: errors.remainingPills } : {})}
-                />
+                <div>
+                  <label className="block text-body font-medium text-neutral-700 mb-2">
+                    Pills Remaining *
+                  </label>
+                  <Input
+                    type="number"
+                    value={formData.remainingPills.toString()}
+                    onChange={(e) => handleInputChange('remainingPills', parseInt(e.target.value) || 0)}
+                    min="0"
+                    max={formData.totalPills}
+                  />
+                  {errors.remainingPills && (
+                    <p className="text-caption text-error-600 mt-1">{errors.remainingPills}</p>
+                  )}
+                </div>
 
-                <Input
-                  label="Refill Reminder (days)"
-                  type="number"
-                  value={formData.refillReminder.toString()}
-                  onChange={(e) => handleInputChange('refillReminder', parseInt(e.target.value) || 7)}
-                  min="1"
-                />
+                <div>
+                  <label className="block text-body font-medium text-neutral-700 mb-2">
+                    Refill Reminder (days)
+                  </label>
+                  <Input
+                    type="number"
+                    value={formData.refillReminder.toString()}
+                    onChange={(e) => handleInputChange('refillReminder', parseInt(e.target.value) || 7)}
+                    min="1"
+                  />
+                </div>
               </div>
             </Card>
           </div>
@@ -423,7 +457,7 @@ const PrescriptionReview: React.FC<PrescriptionReviewProps> = ({
       <div className="flex flex-col sm:flex-row gap-3 mt-8">
         <Button
           variant="secondary"
-          size="md"
+          size="default"
           onClick={onCancel}
           className="flex-1"
         >
@@ -431,8 +465,8 @@ const PrescriptionReview: React.FC<PrescriptionReviewProps> = ({
         </Button>
 
         <Button
-          variant="primary"
-          size="md"
+          variant="default"
+          size="default"
           onClick={handleSave}
           className="flex-1"
         >

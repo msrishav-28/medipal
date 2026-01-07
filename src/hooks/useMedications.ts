@@ -1,146 +1,76 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { medicationRepository } from '@/services';
-import { queryKeys } from '@/services/queryClient';
-import { Medication } from '@/types';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { medicationRepository } from "@/services/medicationRepository";
+import { Medication } from "@/types";
 
-// Hook for getting all medications for a user
+export const MEDICATION_KEYS = {
+  all: ["medications"] as const,
+  lists: () => [...MEDICATION_KEYS.all, "list"] as const,
+  list: (userId: string) => [...MEDICATION_KEYS.lists(), userId] as const,
+  details: () => [...MEDICATION_KEYS.all, "detail"] as const,
+  detail: (id: string) => [...MEDICATION_KEYS.details(), id] as const,
+};
+
 export function useMedications(userId: string) {
   return useQuery({
-    queryKey: queryKeys.medications.byUserId(userId),
+    queryKey: MEDICATION_KEYS.list(userId),
     queryFn: () => medicationRepository.getByUserId(userId),
-    enabled: !!userId,
   });
 }
 
-// Hook for getting active medications for a user
 export function useActiveMedications(userId: string) {
   return useQuery({
-    queryKey: queryKeys.medications.active(userId),
+    queryKey: [...MEDICATION_KEYS.list(userId), "active"],
     queryFn: () => medicationRepository.getActiveMedications(userId),
-    enabled: !!userId,
   });
 }
 
-// Hook for getting a single medication by ID
 export function useMedication(id: string) {
   return useQuery({
-    queryKey: queryKeys.medications.byId(id),
+    queryKey: MEDICATION_KEYS.detail(id),
     queryFn: () => medicationRepository.getById(id),
     enabled: !!id,
   });
 }
 
-// Hook for getting medications due for refill
-export function useMedicationsRefillDue(userId: string, daysAhead: number = 7) {
-  return useQuery({
-    queryKey: queryKeys.medications.refillDue(userId),
-    queryFn: () => medicationRepository.getMedicationsDueForRefill(userId, daysAhead),
-    enabled: !!userId,
-  });
-}
-
-// Hook for creating a new medication
-export function useCreateMedication() {
+export function useAddMedication() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (medicationData: Omit<Medication, 'id' | 'createdAt' | 'updatedAt'>) =>
-      medicationRepository.create(medicationData),
-    onSuccess: (newMedication) => {
-      // Invalidate and refetch medication queries for this user
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.medications.byUserId(newMedication.userId)
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.medications.active(newMedication.userId)
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.medications.refillDue(newMedication.userId)
-      });
-
-      // Add the new medication to the cache
-      queryClient.setQueryData(
-        queryKeys.medications.byId(newMedication.id),
-        newMedication
-      );
+    mutationFn: (newMedication: Omit<Medication, "id" | "createdAt" | "updatedAt">) =>
+      medicationRepository.create(newMedication),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: MEDICATION_KEYS.lists() });
     },
   });
 }
 
-// Hook for updating a medication
 export function useUpdateMedication() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, updates }: { 
-      id: string; 
-      updates: Partial<Omit<Medication, 'id' | 'createdAt' | 'updatedAt'>> 
+    mutationFn: ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<Omit<Medication, "id" | "createdAt" | "updatedAt">>;
     }) => medicationRepository.update(id, updates),
-    onSuccess: (updatedMedication, { id }) => {
-      if (updatedMedication) {
-        // Update the specific medication in cache
-        queryClient.setQueryData(
-          queryKeys.medications.byId(id),
-          updatedMedication
-        );
-
-        // Invalidate related queries
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.medications.byUserId(updatedMedication.userId)
-        });
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.medications.active(updatedMedication.userId)
-        });
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.medications.refillDue(updatedMedication.userId)
-        });
+    onSuccess: (data) => {
+      if (data) {
+        queryClient.invalidateQueries({ queryKey: MEDICATION_KEYS.lists() });
+        queryClient.invalidateQueries({ queryKey: MEDICATION_KEYS.detail(data.id) });
       }
     },
   });
 }
 
-// Hook for deleting a medication
 export function useDeleteMedication() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => medicationRepository.delete(id),
-    onSuccess: (_, id) => {
-      // Remove from cache
-      queryClient.removeQueries({
-        queryKey: queryKeys.medications.byId(id)
-      });
-
-      // Invalidate all medication lists
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.medications.all
-      });
-    },
-  });
-}
-
-// Hook for deactivating a medication
-export function useDeactivateMedication() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => medicationRepository.deactivate(id),
-    onSuccess: (updatedMedication, id) => {
-      if (updatedMedication) {
-        // Update the specific medication in cache
-        queryClient.setQueryData(
-          queryKeys.medications.byId(id),
-          updatedMedication
-        );
-
-        // Invalidate related queries
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.medications.byUserId(updatedMedication.userId)
-        });
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.medications.active(updatedMedication.userId)
-        });
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: MEDICATION_KEYS.lists() });
     },
   });
 }

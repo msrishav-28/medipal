@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { caregiverNotificationService } from '../../services/caregiverNotificationService';
 import { CaregiverNotification } from '../../types/notification';
-import Card from '../ui/Card';
+import { Card } from '../ui/Card';
 import Badge from '../ui/Badge';
-import Button from '../ui/Button';
+import { Button } from '../ui/Button';
 
 interface CaregiverNotificationsProps {
   caregiverId: string;
@@ -107,14 +107,14 @@ export function CaregiverNotifications({ caregiverId }: CaregiverNotificationsPr
         <div className="flex gap-2">
           <Button
             onClick={() => setFilter('all')}
-            variant={filter === 'all' ? 'primary' : 'secondary'}
+            variant={filter === 'all' ? 'default' : 'secondary'}
             size="sm"
           >
             All
           </Button>
           <Button
             onClick={() => setFilter('unread')}
-            variant={filter === 'unread' ? 'primary' : 'secondary'}
+            variant={filter === 'unread' ? 'default' : 'secondary'}
             size="sm"
           >
             Unread {unreadCount > 0 && `(${unreadCount})`}

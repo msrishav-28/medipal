@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PatientReport, caregiverReportingService } from '../../services';
-import Button from '../ui/Button';
-import Card from '../ui/Card';
+import { Button } from '../ui/Button';
+import { Card } from '../ui/Card';
 
 interface CaregiverReportViewProps {
   patientId: string;
@@ -24,11 +24,11 @@ export const CaregiverReportView: React.FC<CaregiverReportViewProps> = ({
     try {
       setLoading(true);
       setError(null);
-      
+
       const generatedReport = reportType === 'weekly'
         ? await caregiverReportingService.generateWeeklyReport(patientId)
         : await caregiverReportingService.generateMonthlyReport(patientId);
-      
+
       setReport(generatedReport);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load report');
@@ -127,7 +127,7 @@ export const CaregiverReportView: React.FC<CaregiverReportViewProps> = ({
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
-              <div 
+              <div
                 className={`h-3 rounded-full transition-all ${isGoodAdherence ? 'bg-green-500' : 'bg-red-500'}`}
                 style={{ width: `${adherenceRate}%` }}
               />
@@ -171,17 +171,15 @@ export const CaregiverReportView: React.FC<CaregiverReportViewProps> = ({
                     {med.medication.dosage} - {med.medication.form}
                   </p>
                 </div>
-                <span className={`text-lg font-semibold ${
-                  med.stats.adherenceRate >= 80 ? 'text-green-500' : 'text-red-500'
-                }`}>
+                <span className={`text-lg font-semibold ${med.stats.adherenceRate >= 80 ? 'text-green-500' : 'text-red-500'
+                  }`}>
                   {med.stats.adherenceRate.toFixed(1)}%
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                <div 
-                  className={`h-2 rounded-full transition-all ${
-                    med.stats.adherenceRate >= 80 ? 'bg-green-500' : 'bg-red-500'
-                  }`}
+                <div
+                  className={`h-2 rounded-full transition-all ${med.stats.adherenceRate >= 80 ? 'bg-green-500' : 'bg-red-500'
+                    }`}
                   style={{ width: `${med.stats.adherenceRate}%` }}
                 />
               </div>

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { caregiverService } from '../../services/caregiverService';
-import Card from '../ui/Card';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { CheckCircle2, UserPlus, AlertCircle, Info } from 'lucide-react';
 
 interface CaregiverRegistrationProps {
   code?: string;
@@ -28,7 +29,7 @@ export function CaregiverRegistration({ code: initialCode, onSuccess }: Caregive
 
     try {
       setLoading(true);
-      
+
       const caregiverData: {
         name: string;
         email: string;
@@ -39,22 +40,22 @@ export function CaregiverRegistration({ code: initialCode, onSuccess }: Caregive
         email: formData.email,
         relationship: formData.relationship
       };
-      
+
       if (formData.phone) {
         caregiverData.phone = formData.phone;
       }
-      
+
       await caregiverService.registerCaregiver(formData.code, caregiverData);
 
       setSuccess(true);
-      
+
       // Call onSuccess callback if provided
       if (onSuccess) {
         setTimeout(() => {
           onSuccess();
         }, 2000);
       }
-      
+
     } catch (err) {
       console.error('Registration error:', err);
       setError(err instanceof Error ? err.message : 'Failed to register. Please check your access code and try again.');
@@ -72,35 +73,36 @@ export function CaregiverRegistration({ code: initialCode, onSuccess }: Caregive
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <GlassCard className="w-full max-w-md border-green-500/20 bg-green-500/5">
           <div className="p-8 text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+            <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/20">
+              <CheckCircle2 className="w-8 h-8 text-green-500" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-foreground mb-2">
               Registration Successful!
             </h2>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               You've been successfully registered as a caregiver. Redirecting to your dashboard...
             </p>
           </div>
-        </Card>
+        </GlassCard>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <GlassCard className="w-full max-w-md">
         <div className="p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4 border border-primary/20">
+              <UserPlus className="w-6 h-6 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground mb-2">
               Caregiver Registration
             </h1>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground text-sm">
               Enter your access code and information to get started
             </p>
           </div>
@@ -108,7 +110,7 @@ export function CaregiverRegistration({ code: initialCode, onSuccess }: Caregive
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Access Code */}
             <div>
-              <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="code" className="block text-sm font-medium text-foreground mb-1.5">
                 Access Code *
               </label>
               <Input
@@ -120,13 +122,13 @@ export function CaregiverRegistration({ code: initialCode, onSuccess }: Caregive
                 placeholder="Enter 6-character code"
                 required
                 maxLength={6}
-                className="w-full uppercase"
+                className="w-full uppercase text-center tracking-[0.2em] font-mono text-lg"
               />
             </div>
 
             {/* Name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">
                 Full Name *
               </label>
               <Input
@@ -142,7 +144,7 @@ export function CaregiverRegistration({ code: initialCode, onSuccess }: Caregive
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">
                 Email Address *
               </label>
               <Input
@@ -158,7 +160,7 @@ export function CaregiverRegistration({ code: initialCode, onSuccess }: Caregive
 
             {/* Phone */}
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1.5">
                 Phone Number (Optional)
               </label>
               <Input
@@ -169,14 +171,14 @@ export function CaregiverRegistration({ code: initialCode, onSuccess }: Caregive
                 onChange={handleChange}
                 placeholder="(555) 123-4567"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 For SMS notifications
               </p>
             </div>
 
             {/* Relationship */}
             <div>
-              <label htmlFor="relationship" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="relationship" className="block text-sm font-medium text-foreground mb-1.5">
                 Relationship *
               </label>
               <select
@@ -185,24 +187,25 @@ export function CaregiverRegistration({ code: initialCode, onSuccess }: Caregive
                 value={formData.relationship}
                 onChange={handleChange}
                 required
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all appearance-none"
               >
-                <option value="">Select relationship</option>
-                <option value="Spouse">Spouse</option>
-                <option value="Partner">Partner</option>
-                <option value="Parent">Parent</option>
-                <option value="Child">Child</option>
-                <option value="Sibling">Sibling</option>
-                <option value="Friend">Friend</option>
-                <option value="Healthcare Provider">Healthcare Provider</option>
-                <option value="Other">Other</option>
+                <option value="" className="bg-neutral-900 text-muted-foreground">Select relationship</option>
+                <option value="Spouse" className="bg-neutral-900">Spouse</option>
+                <option value="Partner" className="bg-neutral-900">Partner</option>
+                <option value="Parent" className="bg-neutral-900">Parent</option>
+                <option value="Child" className="bg-neutral-900">Child</option>
+                <option value="Sibling" className="bg-neutral-900">Sibling</option>
+                <option value="Friend" className="bg-neutral-900">Friend</option>
+                <option value="Healthcare Provider" className="bg-neutral-900">Healthcare Provider</option>
+                <option value="Other" className="bg-neutral-900">Other</option>
               </select>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p className="text-sm text-red-800">{error}</p>
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                <p className="text-sm text-red-400">{error}</p>
               </div>
             )}
 
@@ -216,15 +219,16 @@ export function CaregiverRegistration({ code: initialCode, onSuccess }: Caregive
             </Button>
 
             {/* Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
-              <p className="text-sm text-blue-800">
+            <div className="bg-blue-500/5 border border-blue-500/10 rounded-lg p-3 mt-4 flex items-start gap-2">
+              <Info className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
+              <p className="text-xs text-blue-300/80 leading-relaxed">
                 <strong>Note:</strong> Access codes expire in 24 hours. If your code doesn't work,
                 please request a new one from the patient.
               </p>
             </div>
           </form>
         </div>
-      </Card>
+      </GlassCard>
     </div>
   );
 }

@@ -89,7 +89,7 @@ export function ReminderModal({
   };
 
   const handleSkip = async (reason?: string) => {
-    const finalReason = reason || 
+    const finalReason = reason ||
       (selectedSkipReason === 'Other' ? customSkipReason : selectedSkipReason);
     onSkip(finalReason);
     try {
@@ -162,7 +162,7 @@ export function ReminderModal({
             {reminder.instructions && (
               <p className="text-body text-neutral-500">{reminder.instructions}</p>
             )}
-            
+
             {/* Voice Control */}
             <VoiceControl
               text={`It's time to take your medication. ${reminder.medicationName}, ${reminder.dosage}. ${reminder.instructions || ''}`}
@@ -238,7 +238,7 @@ export function ReminderModal({
                   </label>
                 ))}
               </div>
-              
+
               {selectedSkipReason === 'Other' && (
                 <div className="mt-3">
                   <input
@@ -250,7 +250,7 @@ export function ReminderModal({
                   />
                 </div>
               )}
-              
+
               <div className="flex gap-2 mt-4">
                 <Button
                   variant="secondary"
@@ -261,7 +261,7 @@ export function ReminderModal({
                   Cancel
                 </Button>
                 <Button
-                  variant="danger"
+                  variant="destructive"
                   size="sm"
                   onClick={() => handleSkip()}
                   disabled={!selectedSkipReason || (selectedSkipReason === 'Other' && !customSkipReason.trim())}
@@ -279,7 +279,7 @@ export function ReminderModal({
           <div className="space-y-3">
             {/* Primary Action - I took it */}
             <Button
-              variant="primary"
+              variant="default"
               size="lg"
               onClick={handleTaken}
               className="w-full bg-success-600 hover:bg-success-700 text-white"
@@ -304,7 +304,7 @@ export function ReminderModal({
                 </svg>
                 Snooze
               </Button>
-              
+
               <Button
                 variant="secondary"
                 onClick={() => setShowSkipOptions(!showSkipOptions)}

@@ -2,6 +2,12 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
+import { fileURLToPath } from 'url'
+import tailwindcss from 'tailwindcss'
+import autoprefixer from 'autoprefixer'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -77,7 +83,7 @@ export default defineConfig({
             }
           },
           {
-            urlPattern: ({ request }) => 
+            urlPattern: ({ request }) =>
               request.destination === 'style' || request.destination === 'script',
             handler: 'StaleWhileRevalidate',
             options: {
@@ -94,6 +100,14 @@ export default defineConfig({
       }
     })
   ],
+  css: {
+    postcss: {
+      plugins: [
+        tailwindcss,
+        autoprefixer,
+      ],
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -131,15 +145,7 @@ export default defineConfig({
       },
     },
     // Performance optimizations
-    chunkSizeWarningLimit: 1000,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug'],
-      },
-    },
+    chunkSizeWarningLimit: 1000
   },
   // Performance monitoring
   esbuild: {

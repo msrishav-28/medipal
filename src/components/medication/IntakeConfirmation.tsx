@@ -41,14 +41,14 @@ const IntakeConfirmation: React.FC<IntakeConfirmationProps> = ({
 
   const handleConfirmTaken = async () => {
     if (!scheduledRecord) return;
-    
+
     setIsConfirming(true);
     try {
       await markAsTaken.mutateAsync({
         id: scheduledRecord.id,
         actualTime: new Date()
       });
-      
+
       onConfirm?.(scheduledRecord.id);
     } catch (error) {
       console.error('Failed to mark dose as taken:', error);
@@ -59,16 +59,16 @@ const IntakeConfirmation: React.FC<IntakeConfirmationProps> = ({
 
   const handleSkipDose = async () => {
     if (!scheduledRecord) return;
-    
+
     const reason = selectedReason === 'Other' ? customReason : selectedReason;
-    
+
     try {
       await markAsSkipped.mutateAsync(
         reason
           ? { id: scheduledRecord.id, reason }
           : { id: scheduledRecord.id }
       );
-      
+
       onSkip?.(scheduledRecord.id, reason);
     } catch (error) {
       console.error('Failed to mark dose as skipped:', error);
@@ -76,18 +76,18 @@ const IntakeConfirmation: React.FC<IntakeConfirmationProps> = ({
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: true 
+      hour12: true
     });
   };
 
   const getEncouragingMessage = () => {
     if (!streakData) return "Great job staying on track!";
-    
+
     const { currentStreak } = streakData;
-    
+
     if (currentStreak === 0) {
       return "Let's start a new streak today!";
     } else if (currentStreak < 7) {
@@ -184,7 +184,7 @@ const IntakeConfirmation: React.FC<IntakeConfirmationProps> = ({
         <h2 className="text-h2 font-semibold text-neutral-800 mb-2">
           Time for {medication.name}
         </h2>
-        
+
         <div className="flex items-center justify-center gap-2 mb-2">
           <Badge variant="info" size="lg">
             {medication.dosage} {medication.form}
@@ -233,11 +233,11 @@ const IntakeConfirmation: React.FC<IntakeConfirmationProps> = ({
       {/* Action Buttons */}
       <div className="space-y-3">
         <Button
-          variant="success"
+          variant="default"
           size="lg"
           onClick={handleConfirmTaken}
           disabled={isConfirming || markAsTaken.isPending}
-          className="w-full h-14 text-body-large font-semibold"
+          className="w-full h-14 text-body-large font-semibold bg-green-600 hover:bg-green-700"
         >
           {isConfirming || markAsTaken.isPending ? 'Recording...' : 'I Took It! ✓'}
         </Button>
@@ -250,7 +250,7 @@ const IntakeConfirmation: React.FC<IntakeConfirmationProps> = ({
           >
             Skip This Dose
           </Button>
-          
+
           {onClose && (
             <Button
               variant="secondary"
@@ -266,11 +266,11 @@ const IntakeConfirmation: React.FC<IntakeConfirmationProps> = ({
       {/* Timestamp Info */}
       <div className="mt-4 text-center">
         <p className="text-caption text-neutral-500">
-          Recorded at {new Date().toLocaleTimeString([], { 
-            hour: '2-digit', 
+          Recorded at {new Date().toLocaleTimeString([], {
+            hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
-            hour12: true 
+            hour12: true
           })}
         </p>
       </div>

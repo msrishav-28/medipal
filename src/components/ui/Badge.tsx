@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/utils/cn';
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
+  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
 }
@@ -14,21 +14,22 @@ const Badge: React.FC<BadgeProps> = ({
   children,
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center font-medium rounded-full';
+  const baseClasses = 'inline-flex items-center font-bold rounded-full transition-colors border shadow-sm backdrop-blur-sm';
 
   const variantClasses = {
-    primary: 'bg-primary-100 text-primary-700 border border-primary-200',
-    secondary: 'bg-neutral-100 text-neutral-700 border border-neutral-200',
-    success: 'bg-success-100 text-success-700 border border-success-200',
-    warning: 'bg-warning-100 text-warning-700 border border-warning-200',
-    error: 'bg-error-100 text-error-700 border border-error-200',
-    info: 'bg-blue-100 text-blue-700 border border-blue-200',
+    primary: 'bg-primary/10 text-primary border-primary/20',
+    secondary: 'bg-white/10 text-muted-foreground border-white/10',
+    success: 'bg-green-500/10 text-green-500 border-green-500/20',
+    warning: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+    error: 'bg-red-500/10 text-red-500 border-red-500/20',
+    info: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    outline: 'bg-transparent border-white/20 text-foreground',
   };
 
   const sizeClasses = {
-    sm: 'px-2 py-1 text-xs',
-    md: 'px-3 py-1 text-sm',
-    lg: 'px-4 py-2 text-base',
+    sm: 'px-2 py-0.5 text-xs',
+    md: 'px-2.5 py-0.5 text-sm',
+    lg: 'px-3 py-1 text-base',
   };
 
   return (

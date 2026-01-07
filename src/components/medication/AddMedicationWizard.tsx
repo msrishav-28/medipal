@@ -298,7 +298,7 @@ const AddMedicationWizard: React.FC<AddMedicationWizardProps> = ({
       <div className="flex flex-col sm:flex-row gap-3">
         <Button
           variant="secondary"
-          size="md"
+          size="default"
           onClick={onCancel}
           className="flex-1 order-2 sm:order-1"
         >
@@ -309,7 +309,7 @@ const AddMedicationWizard: React.FC<AddMedicationWizardProps> = ({
           {currentStep > 0 && (
             <Button
               variant="secondary"
-              size="md"
+              size="default"
               onClick={handlePrevious}
               className="flex-1"
             >
@@ -318,8 +318,8 @@ const AddMedicationWizard: React.FC<AddMedicationWizardProps> = ({
           )}
 
           <Button
-            variant="primary"
-            size="md"
+            variant="default"
+            size="default"
             onClick={handleNext}
             className="flex-1"
           >

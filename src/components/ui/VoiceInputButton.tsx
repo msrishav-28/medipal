@@ -35,11 +35,12 @@ export function VoiceInputButton({
       const timer = setTimeout(() => setPulseAnimation(false), 200);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [isVoiceActive, isListening]);
 
   const handleClick = () => {
     if (disabled || !isSupported) return;
-    
+
     if (isListening) {
       onStopListening();
     } else {
@@ -54,8 +55,8 @@ export function VoiceInputButton({
   };
 
   const variantClasses = {
-    primary: isListening 
-      ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg' 
+    primary: isListening
+      ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg'
       : 'bg-primary-blue hover:bg-blue-600 text-white shadow-md',
     secondary: isListening
       ? 'bg-red-100 hover:bg-red-200 text-red-700 border-2 border-red-300'
@@ -74,33 +75,33 @@ export function VoiceInputButton({
       className={cn(
         // Base styles
         'relative rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:ring-offset-2',
-        
+
         // Size classes
         sizeClasses[size],
-        
+
         // Variant classes
         !disabled && isSupported ? variantClasses[variant] : disabledClasses,
-        
+
         // Listening state animations
         isListening && 'animate-pulse',
-        
+
         // Voice activity pulse
         pulseAnimation && 'scale-110',
-        
+
         className
       )}
       aria-label={
-        !isSupported 
-          ? 'Voice input not supported' 
-          : isListening 
-            ? 'Stop voice input' 
+        !isSupported
+          ? 'Voice input not supported'
+          : isListening
+            ? 'Stop voice input'
             : 'Start voice input'
       }
       title={
-        !isSupported 
-          ? 'Voice input is not supported in this browser' 
-          : isListening 
-            ? 'Click to stop listening' 
+        !isSupported
+          ? 'Voice input is not supported in this browser'
+          : isListening
+            ? 'Click to stop listening'
             : 'Click to start voice input'
       }
     >
@@ -173,7 +174,7 @@ export function VoiceInputButton({
               variant === 'primary' ? 'border-white' : 'border-current',
               isVoiceActive ? 'animate-ping' : 'animate-pulse'
             )}
-            style={{ 
+            style={{
               animationDuration: '1.5s',
               animationDelay: '0.2s'
             }}
@@ -194,10 +195,10 @@ export interface RecordingIndicatorProps {
   className?: string;
 }
 
-export function RecordingIndicator({ 
-  isListening, 
-  isVoiceActive, 
-  className 
+export function RecordingIndicator({
+  isListening,
+  isVoiceActive,
+  className
 }: RecordingIndicatorProps) {
   if (!isListening) return null;
 
@@ -214,7 +215,7 @@ export function RecordingIndicator({
           {isVoiceActive ? 'Listening...' : 'Speak now'}
         </span>
       </div>
-      
+
       {/* Audio level bars */}
       <div className="flex items-center gap-0.5">
         {[1, 2, 3, 4].map((bar) => (
@@ -222,8 +223,8 @@ export function RecordingIndicator({
             key={bar}
             className={cn(
               'w-1 bg-primary-blue rounded-full transition-all duration-150',
-              isVoiceActive 
-                ? `h-${Math.min(bar * 2, 6)} animate-pulse` 
+              isVoiceActive
+                ? `h-${Math.min(bar * 2, 6)} animate-pulse`
                 : 'h-2 opacity-30'
             )}
             style={{

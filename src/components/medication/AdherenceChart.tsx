@@ -1,7 +1,9 @@
 import React from 'react';
-import { Card, Badge } from '@/components/ui';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { Badge } from '@/components/ui';
 import { useAdherenceStatistics, useIntakeRecordsByDateRange } from '@/hooks/useIntakeRecords';
 import { cn } from '@/utils/cn';
+import { motion } from 'framer-motion';
 
 interface AdherenceChartProps {
   userId: string;
@@ -24,7 +26,7 @@ const AdherenceChart: React.FC<AdherenceChartProps> = ({
   className,
 }) => {
   const { data: statistics, isLoading } = useAdherenceStatistics(userId, days);
-  
+
   // Get daily breakdown for the chart
   const startDate = new Date(Date.now() - (days * 24 * 60 * 60 * 1000));
   const endDate = new Date();
@@ -35,7 +37,7 @@ const AdherenceChart: React.FC<AdherenceChartProps> = ({
     if (!records) return [];
 
     const dataMap = new Map<string, DayData>();
-    
+
     // Initialize all days with zero data
     for (let i = 0; i < days; i++) {
       const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
@@ -52,14 +54,14 @@ const AdherenceChart: React.FC<AdherenceChartProps> = ({
     records.forEach(record => {
       const dateKey = record.scheduledTime.toDateString();
       const dayData = dataMap.get(dateKey);
-      
+
       if (dayData) {
         dayData.totalDoses++;
         if (record.status === 'taken') {
           dayData.takenDoses++;
         }
-        dayData.adherenceRate = dayData.totalDoses > 0 
-          ? (dayData.takenDoses / dayData.totalDoses) * 100 
+        dayData.adherenceRate = dayData.totalDoses > 0
+          ? (dayData.takenDoses / dayData.totalDoses) * 100
           : 0;
       }
     });
@@ -68,10 +70,10 @@ const AdherenceChart: React.FC<AdherenceChartProps> = ({
   }, [records, days, startDate]);
 
   const getBarColor = (rate: number) => {
-    if (rate >= 90) return 'bg-success-500';
-    if (rate >= 70) return 'bg-warning-500';
-    if (rate > 0) return 'bg-error-500';
-    return 'bg-neutral-200';
+    if (rate >= 90) return 'bg-success-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]';
+    if (rate >= 70) return 'bg-warning-500 shadow-[0_0_10px_rgba(234,179,8,0.4)]';
+    if (rate > 0) return 'bg-error-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]';
+    return 'bg-white/10';
   };
 
   const getBarHeight = (rate: number) => {
@@ -81,27 +83,27 @@ const AdherenceChart: React.FC<AdherenceChartProps> = ({
   const formatDate = (date: Date) => {
     const today = new Date();
     const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-    
+
     if (date.toDateString() === today.toDateString()) return 'Today';
     if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
-    
-    return date.toLocaleDateString([], { 
-      month: 'short', 
-      day: 'numeric' 
+
+    return date.toLocaleDateString([], {
+      month: 'short',
+      day: 'numeric'
     });
   };
 
   const calculateTrend = () => {
     if (dailyData.length < 7) return null;
-    
+
     const firstWeek = dailyData.slice(0, 7);
     const secondWeek = dailyData.slice(-7);
-    
+
     const firstWeekAvg = firstWeek.reduce((sum, day) => sum + day.adherenceRate, 0) / 7;
     const secondWeekAvg = secondWeek.reduce((sum, day) => sum + day.adherenceRate, 0) / 7;
-    
+
     const trend = secondWeekAvg - firstWeekAvg;
-    
+
     return {
       direction: trend > 5 ? 'up' : trend < -5 ? 'down' : 'stable',
       change: Math.abs(trend),
@@ -113,58 +115,57 @@ const AdherenceChart: React.FC<AdherenceChartProps> = ({
 
   if (isLoading) {
     return (
-      <Card className={cn('p-6', className)}>
+      <GlassCard className={cn('p-6', className)}>
         <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-neutral-200 rounded w-1/3"></div>
-          <div className="h-24 bg-neutral-200 rounded"></div>
+          <div className="h-4 bg-white/10 rounded w-1/3"></div>
+          <div className="h-24 bg-white/10 rounded"></div>
           <div className="flex gap-2">
             {Array.from({ length: 7 }).map((_, i) => (
-              <div key={i} className="flex-1 h-16 bg-neutral-200 rounded"></div>
+              <div key={i} className="flex-1 h-16 bg-white/10 rounded"></div>
             ))}
           </div>
         </div>
-      </Card>
+      </GlassCard>
     );
   }
 
   if (!statistics) return null;
 
   return (
-    <Card className={cn('p-6', className)}>
+    <GlassCard className={cn('p-6', className)}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-h3 font-semibold text-neutral-800 mb-1">
+          <h3 className="text-xl font-bold font-heading text-foreground mb-1">
             Adherence Trend
           </h3>
-          <p className="text-body text-neutral-600">
+          <p className="text-sm text-muted-foreground">
             Last {days} days
           </p>
         </div>
-        
+
         {trend && (
           <div className="text-right">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <span className={cn(
                 'text-2xl',
-                trend.direction === 'up' ? 'text-success-500' : 
-                trend.direction === 'down' ? 'text-error-500' : 
-                'text-neutral-500'
+                trend.direction === 'up' ? 'text-success-500' :
+                  trend.direction === 'down' ? 'text-error-500' :
+                    'text-muted-foreground'
               )}>
-                {trend.direction === 'up' ? '📈' : 
-                 trend.direction === 'down' ? '📉' : 
-                 '➡️'}
+                {trend.direction === 'up' ? '📈' :
+                  trend.direction === 'down' ? '📉' :
+                    '➡️'}
               </span>
-              <Badge 
+              <Badge
                 variant={
-                  trend.direction === 'up' ? 'success' : 
-                  trend.direction === 'down' ? 'error' : 
-                  'secondary'
+                  trend.direction === 'up' ? 'success' :
+                    trend.direction === 'down' ? 'error' :
+                      'secondary'
                 }
-                size="sm"
               >
-                {trend.direction === 'stable' ? 'Stable' : 
-                 `${trend.change.toFixed(1)}% ${trend.isImproving ? 'better' : 'lower'}`}
+                {trend.direction === 'stable' ? 'Stable' :
+                  `${trend.change.toFixed(1)}% ${trend.isImproving ? 'better' : 'lower'}`}
               </Badge>
             </div>
           </div>
@@ -172,70 +173,73 @@ const AdherenceChart: React.FC<AdherenceChartProps> = ({
       </div>
 
       {/* Overall Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="text-center p-3 bg-primary-50 rounded-lg">
-          <div className="text-xl font-bold text-primary-700">
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="text-center p-4 bg-primary/10 rounded-xl border border-primary/20">
+          <div className="text-2xl font-bold text-primary">
             {Math.round(statistics.adherenceRate)}%
           </div>
-          <div className="text-caption text-primary-600">
+          <div className="text-xs font-medium uppercase tracking-wider text-primary/80">
             Overall
           </div>
         </div>
-        <div className="text-center p-3 bg-success-50 rounded-lg">
-          <div className="text-xl font-bold text-success-700">
+        <div className="text-center p-4 bg-green-500/10 rounded-xl border border-green-500/20">
+          <div className="text-2xl font-bold text-green-500">
             {statistics.takenDoses}
           </div>
-          <div className="text-caption text-success-600">
+          <div className="text-xs font-medium uppercase tracking-wider text-green-500/80">
             Taken
           </div>
         </div>
-        <div className="text-center p-3 bg-neutral-50 rounded-lg">
-          <div className="text-xl font-bold text-neutral-700">
+        <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
+          <div className="text-2xl font-bold text-foreground">
             {statistics.totalDoses}
           </div>
-          <div className="text-caption text-neutral-600">
+          <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Total
           </div>
         </div>
       </div>
 
       {/* Bar Chart */}
-      <div className="mb-4">
-        <div className="flex items-end justify-between gap-1 h-24 mb-2">
-          {dailyData.map((day) => (
+      <div className="mb-6">
+        <div className="flex items-end justify-between gap-2 h-32 mb-3">
+          {dailyData.map((day, i) => (
             <div
               key={day.date.toISOString()}
-              className="flex-1 flex flex-col items-center"
+              className="flex-1 flex flex-col items-center group relative"
             >
-              <div className="relative flex-1 flex items-end w-full">
-                <div
+              <div className="relative flex-1 flex items-end w-full bg-white/5 rounded-t-lg overflow-hidden">
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: `${getBarHeight(day.adherenceRate)}%` }}
+                  transition={{ duration: 0.5, delay: i * 0.05 }}
                   className={cn(
-                    'w-full rounded-t transition-all duration-500 ease-out',
+                    'w-full rounded-t transition-all duration-300',
                     getBarColor(day.adherenceRate)
                   )}
-                  style={{ 
-                    height: `${getBarHeight(day.adherenceRate)}%`,
-                    minHeight: day.totalDoses > 0 ? '4px' : '2px'
-                  }}
-                  title={`${formatDate(day.date)}: ${Math.round(day.adherenceRate)}% (${day.takenDoses}/${day.totalDoses})`}
                 />
+              </div>
+
+              {/* Tooltip */}
+              <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-xs p-2 rounded pointer-events-none whitespace-nowrap z-10">
+                {Math.round(day.adherenceRate)}% ({day.takenDoses}/{day.totalDoses})
               </div>
             </div>
           ))}
         </div>
 
         {/* Date Labels */}
-        <div className="flex justify-between text-caption text-neutral-500">
+        <div className="flex justify-between text-xs text-muted-foreground font-medium">
           {dailyData.map((day, index) => {
             // Show every other day for space, but always show first and last
-            const shouldShow = index === 0 || 
-                              index === dailyData.length - 1 || 
-                              index % Math.ceil(dailyData.length / 5) === 0;
-            
+            const shouldShow = index === 0 ||
+              index === dailyData.length - 1 ||
+              index % Math.ceil(dailyData.length / 5) === 0;
+
             return (
               <div key={day.date.toISOString()} className="flex-1 text-center">
                 {shouldShow && (
-                  <span className="text-xs">
+                  <span>
                     {formatDate(day.date)}
                   </span>
                 )}
@@ -245,42 +249,22 @@ const AdherenceChart: React.FC<AdherenceChartProps> = ({
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center justify-center gap-4 text-caption">
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-success-500 rounded"></div>
-          <span className="text-neutral-600">≥90%</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-warning-500 rounded"></div>
-          <span className="text-neutral-600">70-89%</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-error-500 rounded"></div>
-          <span className="text-neutral-600">&lt;70%</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-neutral-200 rounded"></div>
-          <span className="text-neutral-600">No doses</span>
-        </div>
-      </div>
-
       {/* Insights */}
-      <div className="mt-4 p-3 bg-neutral-50 rounded-lg">
-        <p className="text-body text-neutral-700">
-          {statistics.adherenceRate >= 95 
+      <div className="mt-6 p-4 bg-white/5 rounded-xl border border-white/10">
+        <p className="text-sm font-medium text-foreground text-center">
+          {statistics.adherenceRate >= 95
             ? "Excellent consistency! You're maintaining outstanding adherence. 🏆"
             : statistics.adherenceRate >= 85
-            ? "Great job! Your adherence is very good. Keep up the momentum! 🌟"
-            : statistics.adherenceRate >= 70
-            ? "Good progress! Consider setting more reminders to improve consistency. 💪"
-            : statistics.adherenceRate >= 50
-            ? "There's room for improvement. Try using more reminder features. 🎯"
-            : "Let's work together to build a better routine. Small steps lead to big improvements! 💙"
+              ? "Great job! Your adherence is very good. Keep up the momentum! 🌟"
+              : statistics.adherenceRate >= 70
+                ? "Good progress! Consider setting more reminders to improve consistency. 💪"
+                : statistics.adherenceRate >= 50
+                  ? "There's room for improvement. Try using more reminder features. 🎯"
+                  : "Let's work together to build a better routine. Small steps lead to big improvements! 💙"
           }
         </p>
       </div>
-    </Card>
+    </GlassCard>
   );
 };
 

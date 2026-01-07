@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { caregiverReportingService } from '../../services';
-import Card from '../ui/Card';
+import { Card } from '../ui/Card';
 
 interface PatientStatus {
   adherenceToday: number;
@@ -60,9 +60,9 @@ export const PatientStatusCard: React.FC<PatientStatusCardProps> = ({
           ⚠️ Needs Attention
         </div>
       )}
-      
+
       <h3 className="text-lg font-bold mb-3">{patientName}</h3>
-      
+
       <div className="space-y-3">
         {/* Weekly Adherence */}
         <div className="flex items-center justify-between">
