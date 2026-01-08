@@ -2,6 +2,16 @@
 
 A comprehensive Progressive Web Application for medication management, featuring voice-powered interfaces, AI assistance, and caregiver monitoring capabilities.
 
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Google Gemini](https://img.shields.io/badge/Google%20Gemini-8E75B2?style=for-the-badge&logo=google%20gemini&logoColor=white)
+![Mistral AI](https://img.shields.io/badge/Mistral%20AI-FD6F00?style=for-the-badge&logo=mistral%20ai&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+
+
 ## Overview
 
 MediPal is a modern, accessible medication management solution designed to help users track medications, receive timely reminders, and maintain medication adherence. The application supports multiple input methods including voice, manual entry, and OCR prescription scanning.
