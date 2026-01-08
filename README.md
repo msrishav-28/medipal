@@ -69,44 +69,7 @@ MediPal is a modern, accessible medication management solution designed to help 
 - Adjustable font sizes
 - Touch-friendly interface (44x44px minimum targets)
 
-## Technical Stack
 
-### Frontend
-- React 18.2.0
-- TypeScript 5.2.2
-- Vite 5.0.8
-- TailwindCSS 3.4.17
-- Framer Motion 12.x
-- React Query 5.90.5
-
-### UI Design System
-- Crystal Clear glassmorphism design
-- Custom GlassCard and BentoGrid components
-- Responsive layouts with DashboardLayout
-- Modern sidebar and bottom navigation
-
-### Data Management
-- IndexedDB with Dexie 4.2.1
-- Offline-first data synchronization
-- Optimistic updates
-- Data migration system
-
-### AI and Voice
-- Google Gemini API integration
-- Web Speech API
-- Mistral OCR for prescription scanning
-- Natural Language Processing
-
-### Testing
-- Vitest 4.0.3
-- React Testing Library
-- Integration and unit tests
-
-### PWA
-- Workbox 7.3.0 via vite-plugin-pwa
-- Service Worker caching
-- Background sync
-- Push notifications
 
 ## Project Structure
 
