@@ -27,8 +27,11 @@ cp .env.example .env
 Required environment variables:
 
 ```env
-# OpenAI API for conversational AI
-VITE_OPENAI_API_KEY=your_openai_api_key
+# Google Gemini API for conversational AI
+VITE_GEMINI_API_KEY=your_gemini_api_key
+
+# Mistral API for OCR prescription scanning
+VITE_MISTRAL_API_KEY=your_mistral_api_key
 
 # Optional: For production deployment
 VITE_API_URL=https://api.medipal.app
@@ -52,6 +55,9 @@ npm run type-check
 
 # Linting
 npm run lint
+
+# Fix lint errors
+npm run lint:fix
 
 # Format code
 npm run format
@@ -88,20 +94,45 @@ src/
 ├── components/          # React components
 │   ├── accessibility/   # Accessibility utilities and components
 │   ├── caregiver/       # Caregiver-specific features
-│   ├── dev/             # Development tools (not in production)
-│   ├── history/         # Analytics and reporting
-│   ├── layout/          # Layout components (navigation, etc.)
+│   ├── layout/          # Layout components (Navbar, Sidebar, etc.)
 │   ├── medication/      # Medication management
 │   ├── notification/    # Notifications and reminders
 │   ├── pwa/             # PWA-specific components
 │   ├── providers/       # React context providers
 │   └── ui/              # Reusable UI components
 ├── hooks/               # Custom React hooks
+├── layouts/             # Page layouts (DashboardLayout)
+├── lib/                 # Utility libraries
+├── pages/               # Application pages
 ├── services/            # Business logic and API clients
 ├── types/               # TypeScript type definitions
 ├── utils/               # Utility functions
 └── test/                # Test utilities and setup
 ```
+
+### Key Components
+
+#### UI Components (src/components/ui/)
+- **GlassCard** - Glassmorphism card component
+- **BentoGrid** - Dashboard grid layout
+- **Button** - Styled button with variants
+- **ChatInterface** - AI chat component
+- **VoiceInput** - Voice input component
+- **SkeletonLoader** - Loading state components
+
+#### Layout Components (src/components/layout/)
+- **Navbar** - Top navigation bar
+- **Sidebar** - Collapsible side navigation
+- **BottomNavigation** - Mobile navigation
+- **PageLayout** - Page wrapper with responsive design
+
+#### Pages (src/pages/)
+- **Dashboard** - Main dashboard with overview
+- **Medications** - Medication list and management
+- **Schedule** - Medication schedule view
+- **Reports** - Analytics and reporting
+- **Chat** - AI assistant
+- **Settings** - User preferences
 
 ### Design Patterns
 
@@ -135,13 +166,12 @@ src/
 - Functional components only
 - Named exports for components
 - Props interface defined inline or separately
-- Use `React.FC` type when appropriate
 
 #### Naming Conventions
 - PascalCase for components and types
 - camelCase for functions and variables
 - UPPER_CASE for constants
-- kebab-case for file names
+- kebab-case for file names (except components)
 
 ### Adding New Features
 
@@ -158,26 +188,19 @@ Follow the component structure:
 ```typescript
 // components/feature/NewFeature.tsx
 import { useState } from 'react';
-import type { NewFeatureProps } from './types';
+
+interface NewFeatureProps {
+  prop1: string;
+  prop2: number;
+}
 
 export function NewFeature({ prop1, prop2 }: NewFeatureProps) {
-  // Component logic
   return (
     <div>
       {/* Component UI */}
     </div>
   );
 }
-
-// components/feature/types.ts
-export interface NewFeatureProps {
-  prop1: string;
-  prop2: number;
-}
-
-// components/feature/index.ts
-export { NewFeature } from './NewFeature';
-export type { NewFeatureProps } from './types';
 ```
 
 #### 3. Add Tests
@@ -196,11 +219,7 @@ describe('NewFeature', () => {
 });
 ```
 
-#### 4. Update Documentation
-
-Add feature documentation to relevant guides.
-
-#### 5. Submit Pull Request
+#### 4. Submit Pull Request
 
 ```bash
 git add .
@@ -262,42 +281,6 @@ export const newTableRepository = {
 };
 ```
 
-## API Integration
-
-### Adding New API Endpoints
-
-```typescript
-// services/api.ts
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  timeout: 10000,
-});
-
-export const apiService = {
-  async newEndpoint(params: any) {
-    const response = await api.post('/endpoint', params);
-    return response.data;
-  }
-};
-```
-
-### Error Handling
-
-```typescript
-try {
-  const data = await apiService.newEndpoint(params);
-  return data;
-} catch (error) {
-  if (axios.isAxiosError(error)) {
-    console.error('API Error:', error.response?.data);
-    throw new Error(error.response?.data?.message || 'API request failed');
-  }
-  throw error;
-}
-```
-
 ## Performance Optimization
 
 ### Code Splitting
@@ -338,17 +321,6 @@ npm run analyze
 ```
 
 ## Debugging
-
-### Development Tools
-
-The application includes a development dashboard accessible in development mode:
-
-1. Start development server: `npm run dev`
-2. Look for floating chart icon in bottom-right corner
-3. Click to open dashboard with:
-   - Performance metrics
-   - Accessibility audit
-   - Browser compatibility info
 
 ### React DevTools
 
@@ -427,35 +399,6 @@ VITE_API_URL=https://api.medipal.app npm run build
 - [ ] Verify environment variables
 - [ ] Update CHANGELOG.md
 
-## Monitoring and Analytics
-
-### Performance Monitoring
-
-The application automatically tracks Web Vitals in production:
-
-```typescript
-// Metrics are logged to console in development
-// In production, send to analytics service
-import { reportPerformanceMetrics } from '@/utils/performance';
-
-reportPerformanceMetrics((metrics) => {
-  // Send to analytics service
-  analytics.track('performance', metrics);
-});
-```
-
-### Error Tracking
-
-Implement error tracking service integration:
-
-```typescript
-// App.tsx
-window.addEventListener('error', (event) => {
-  // Send to error tracking service
-  errorTracker.captureException(event.error);
-});
-```
-
 ## Resources
 
 ### Documentation
@@ -463,6 +406,7 @@ window.addEventListener('error', (event) => {
 - TypeScript Handbook: https://www.typescriptlang.org/docs
 - Vite Guide: https://vitejs.dev/guide
 - TailwindCSS: https://tailwindcss.com/docs
+- Framer Motion: https://www.framer.com/motion
 
 ### Tools
 - VS Code Extensions:

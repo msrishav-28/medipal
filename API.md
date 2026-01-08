@@ -15,6 +15,8 @@ services/
 ├── aiService.ts              # AI chatbot integration
 ├── api.ts                    # API client configuration
 ├── caregiverService.ts       # Caregiver features
+├── caregiverNotificationService.ts # Caregiver alerts
+├── caregiverReportingService.ts    # Caregiver reports
 ├── database.ts               # IndexedDB configuration
 ├── databaseService.ts        # Database operations
 ├── nlpService.ts             # Natural language processing
@@ -24,6 +26,7 @@ services/
 ├── offlineSyncService.ts     # Offline data synchronization
 ├── speechRecognitionService.ts # Voice input
 ├── voiceService.ts           # Text-to-speech
+├── queryClient.ts            # React Query configuration
 └── *Repository.ts            # Data access repositories
 ```
 
@@ -303,65 +306,70 @@ await caregiverRepository.updatePermissions(caregiverId, {
 
 ## External APIs
 
-### OpenAI Integration
+### Google Gemini Integration
 
 Used for conversational AI chatbot.
 
 ```typescript
 // services/aiService.ts
-import { AIService } from '@/services/aiService';
-
-const aiService = new AIService(apiKey);
+import { aiService } from '@/services/aiService';
 
 // Process user message
-const response = await aiService.processMessage(
-  userId,
-  'What medications should I take with food?'
+const response = await aiService.generateResponse(
+  'What medications should I take with food?',
+  context
 );
 
 // Parse medication from natural language
-const medication = await aiService.parseMedicationFromText(
+const medication = aiService.parseMedicationFromText(
   'I need to take 100mg of aspirin twice daily'
 );
 
 // Check for interactions
-const conflicts = await aiService.checkMedicationConflicts(
-  medications,
-  newMedication
+const conflicts = aiService.checkMedicationConflicts(
+  'Aspirin',
+  existingMedications
 );
 ```
 
 **Configuration:**
 
 ```env
-VITE_OPENAI_API_KEY=sk-...
+VITE_GEMINI_API_KEY=your_gemini_api_key
 ```
 
-**Rate Limits:**
-- Free tier: 3 requests/minute
-- Paid tier: 60 requests/minute
-
-### Tesseract.js (OCR)
+### Mistral OCR
 
 Used for prescription scanning.
 
 ```typescript
 // services/ocrService.ts
-import { scanPrescription } from '@/services/ocrService';
+import { ocrService } from '@/services/ocrService';
 
 // Scan prescription image
-const result = await scanPrescription(imageFile);
+const result = await ocrService.extractTextFromImage(imageFile);
+
+// Parse prescription data
+const prescription = ocrService.parsePrescriptionText(result);
 
 // Result contains:
-// - medications: Medication[]
-// - rawText: string
-// - confidence: number
+// - medicationName: string
+// - dosage: string
+// - form: 'tablet' | 'capsule' | 'liquid' | 'injection'
+// - quantity: number
+// - instructions: string
+```
+
+**Configuration:**
+
+```env
+VITE_MISTRAL_API_KEY=your_mistral_api_key
 ```
 
 **Supported Formats:**
-- JPEG, PNG, WebP
+- JPEG, PNG, WebP, PDF
 - Maximum file size: 10MB
-- Recommended resolution: 300+ DPI
+- Cloud-based processing with high accuracy
 
 ## Web APIs
 
@@ -460,13 +468,6 @@ await offlineSyncService.sync();
 const count = await offlineSyncService.getPendingCount();
 ```
 
-### Conflict Resolution
-
-```typescript
-// Last-write-wins strategy
-// Server timestamp determines the winning record
-```
-
 ## Error Handling
 
 All services use consistent error handling:
@@ -477,34 +478,21 @@ try {
   return result;
 } catch (error) {
   if (error instanceof DatabaseError) {
-    // Handle database errors
     console.error('Database error:', error.message);
   } else if (error instanceof NetworkError) {
-    // Handle network errors
     console.error('Network error:', error.message);
   } else {
-    // Handle unknown errors
     console.error('Unknown error:', error);
   }
   throw error;
 }
 ```
 
-## Rate Limiting
-
-### Client-Side Rate Limiting
-
-```typescript
-// OCR scanning: 10 requests per minute
-// AI chat: Based on OpenAI tier
-// Notifications: No limit (browser handles)
-```
-
 ## Security
 
 ### Data Privacy
 - All data stored locally in IndexedDB
-- No data sent to external servers except OpenAI
+- No data sent to external servers except Gemini and Mistral APIs
 - Caregiver access codes are hashed
 - HTTPS required for Service Workers
 
@@ -529,43 +517,8 @@ try {
 - Debounce search inputs
 - Index frequently queried fields
 
-## Testing
-
-### Mock Services
-
-```typescript
-// vitest.setup.ts
-vi.mock('@/services/database', () => ({
-  db: mockDatabase
-}));
-
-vi.mock('@/services/aiService', () => ({
-  AIService: MockAIService
-}));
-```
-
-### Test Data
-
-```typescript
-// test/fixtures.ts
-export const mockMedication = {
-  id: '1',
-  userId: 'user-1',
-  name: 'Test Medication',
-  dosage: '100mg',
-  form: 'tablet',
-  schedule: {
-    type: 'time-based',
-    times: ['08:00'],
-    frequency: 'Once daily'
-  },
-  active: true,
-  createdAt: new Date()
-};
-```
-
 ## Versioning
 
-API version: 1.0.0
+API version: 1.1.0
 
 Breaking changes will increment major version.

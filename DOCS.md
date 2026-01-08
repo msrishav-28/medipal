@@ -40,7 +40,6 @@ Welcome to the MediPal documentation. This guide will help you navigate through 
    - Feature additions
    - Bug fixes
    - Breaking changes
-   - Migration guides
 
 ### Specification Documents
 
@@ -63,13 +62,6 @@ Located in `.kiro/specs/`:
    - Development roadmap
    - Progress tracking
    - Completion status
-
-### Configuration Files
-
-1. **[.github/instructions/codacy.instructions.md](./.github/instructions/codacy.instructions.md)** - Code quality guidelines
-   - Codacy integration
-   - Code analysis rules
-   - Quality gates
 
 ## Quick Start Paths
 
@@ -97,6 +89,29 @@ Located in `.kiro/specs/`:
 3. See [CHANGELOG.md](./CHANGELOG.md) for release history
 4. Check [requirements.md](./.kiro/specs/requirements.md) for scope
 
+## Key Project Components
+
+### Pages
+- **Dashboard** - Main overview with stats and quick actions
+- **Medications** - List and manage medications
+- **Schedule** - View medication schedule
+- **Reports** - Analytics and adherence reports
+- **Chat** - AI assistant for medication queries
+- **Settings** - User preferences and configuration
+
+### UI Components
+- **GlassCard** - Glassmorphism card component
+- **BentoGrid** - Dashboard grid layout
+- **Button** - Styled button variants
+- **ChatInterface** - AI chat interface
+- **VoiceInput** - Voice command input
+
+### Services
+- **aiService** - Google Gemini integration
+- **ocrService** - Mistral OCR prescription scanning
+- **notificationService** - Push notifications
+- **voiceService** - Text-to-speech
+
 ## Documentation Standards
 
 All documentation follows these principles:
@@ -105,7 +120,6 @@ All documentation follows these principles:
 2. **Accuracy** - Up-to-date and technically correct
 3. **Completeness** - Comprehensive coverage of topics
 4. **Consistency** - Uniform style and formatting
-5. **Professionalism** - Formal tone without unnecessary embellishments
 
 ## Maintenance
 
@@ -132,6 +146,7 @@ If you cannot find what you are looking for:
 - [TypeScript Handbook](https://www.typescriptlang.org/docs)
 - [Vite Guide](https://vitejs.dev/guide)
 - [TailwindCSS Documentation](https://tailwindcss.com/docs)
+- [Framer Motion](https://www.framer.com/motion)
 - [Dexie.js Documentation](https://dexie.org)
 - [React Query Documentation](https://tanstack.com/query/latest)
 
@@ -163,4 +178,4 @@ Documentation is licensed under MIT License, same as the project code.
 
 ---
 
-Last updated: 2025-11-01
+Last updated: January 2026

@@ -134,7 +134,6 @@ export default defineConfig({
           'query-vendor': ['@tanstack/react-query'],
           'ui-vendor': ['lucide-react', 'clsx', 'tailwind-merge'],
           // Feature chunks
-          'ocr': ['tesseract.js'],
           'pdf': ['jspdf', 'jspdf-autotable'],
           'database': ['dexie'],
         },

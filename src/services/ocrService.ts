@@ -1,8 +1,7 @@
-import { createWorker, Worker } from 'tesseract.js';
-
 export interface OCRResult {
   text: string;
   confidence: number;
+  markdown: string;
   words: Array<{
     text: string;
     confidence: number;
@@ -28,53 +27,108 @@ export interface ParsedPrescription {
 }
 
 class OCRService {
-  private worker: Worker | null = null;
-  private isInitialized = false;
+  private apiKey: string | null = null;
+  private baseUrl = 'https://api.mistral.ai/v1';
+  private model = 'mistral-ocr-latest';
 
-  async initialize(): Promise<void> {
-    if (this.isInitialized) return;
-
-    try {
-      this.worker = await createWorker('eng');
-      this.isInitialized = true;
-    } catch (error) {
-      console.error('Failed to initialize OCR worker:', error);
-      throw new Error('OCR service initialization failed');
-    }
+  constructor() {
+    this.apiKey = import.meta.env.VITE_MISTRAL_API_KEY || null;
   }
 
-  async extractTextFromImage(imageFile: File | string): Promise<OCRResult> {
-    if (!this.worker) {
-      await this.initialize();
-    }
+  /**
+   * Set Mistral API key
+   */
+  setApiKey(apiKey: string): void {
+    this.apiKey = apiKey;
+  }
 
-    if (!this.worker) {
-      throw new Error('OCR worker not initialized');
+  /**
+   * Check if OCR service is configured
+   */
+  isConfigured(): boolean {
+    return this.apiKey !== null && this.apiKey !== '';
+  }
+
+  /**
+   * Convert File to base64 string
+   */
+  private async fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve(result);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  }
+
+  /**
+   * Extract text from image using Mistral OCR
+   */
+  async extractTextFromImage(imageFile: File | string): Promise<OCRResult> {
+    if (!this.isConfigured()) {
+      throw new Error('Mistral OCR service is not configured. Please set VITE_MISTRAL_API_KEY.');
     }
 
     try {
-      const result = await this.worker.recognize(imageFile);
-      const resultData = result.data as any; // Tesseract.js types are incomplete
-      
+      let imageUrl: string;
+
+      if (typeof imageFile === 'string') {
+        // It's already a URL or base64 string
+        imageUrl = imageFile;
+      } else {
+        // Convert File to base64
+        imageUrl = await this.fileToBase64(imageFile);
+      }
+
+      const response = await fetch(`${this.baseUrl}/ocr/process`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify({
+          model: this.model,
+          document: {
+            type: 'image_url',
+            image_url: imageUrl
+          },
+          include_image_base64: false
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Mistral OCR API error: ${response.status} - ${errorData.message || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+
+      // Extract text from Mistral OCR response
+      const pages = data.pages || [];
+      const markdownContent = pages.map((page: any) => page.markdown || '').join('\n');
+
       return {
-        text: resultData.text,
-        confidence: resultData.confidence,
-        words: (resultData.words || []).map((word: any) => ({
-          text: word.text,
-          confidence: word.confidence,
-          bbox: word.bbox,
-        })),
+        text: markdownContent,
+        markdown: markdownContent,
+        confidence: 95, // Mistral OCR typically has high confidence
+        words: [] // Mistral OCR returns markdown, not word-level data
       };
     } catch (error) {
-      console.error('OCR text extraction failed:', error);
+      console.error('Mistral OCR extraction failed:', error);
       throw new Error('Failed to extract text from image');
     }
   }
 
+  /**
+   * Parse prescription text from OCR result
+   */
   parsePrescriptionText(ocrResult: OCRResult): ParsedPrescription {
     const text = ocrResult.text.toLowerCase();
     const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-    
+
     const parsed: ParsedPrescription = {
       confidence: ocrResult.confidence,
     };
@@ -245,12 +299,23 @@ class OCRService {
       .join(' ');
   }
 
-  async terminate(): Promise<void> {
-    if (this.worker) {
-      await this.worker.terminate();
-      this.worker = null;
-      this.isInitialized = false;
+  /**
+   * Initialize is no longer needed for Mistral (no worker to create)
+   * Kept for backward compatibility
+   */
+  async initialize(): Promise<void> {
+    if (!this.isConfigured()) {
+      throw new Error('OCR service initialization failed: API key not configured');
     }
+    // No initialization needed for Mistral API
+  }
+
+  /**
+   * Terminate is no longer needed for Mistral (no worker to terminate)
+   * Kept for backward compatibility
+   */
+  async terminate(): Promise<void> {
+    // No cleanup needed for Mistral API
   }
 
   // Utility method to validate if extracted data looks reasonable

@@ -48,14 +48,14 @@ export interface AIResponse {
 export class AIService {
   private static instance: AIService;
   private apiKey: string | null = null;
-  private baseUrl = 'https://api.openai.com/v1';
-  private model = 'gpt-3.5-turbo';
+  private baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
+  private model = 'gemini-1.5-flash';
   private maxTokens = 500;
   private temperature = 0.7;
 
   private constructor() {
-    // In a real app, this would come from environment variables or user settings
-    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || null;
+    // Get Gemini API key from environment variables
+    this.apiKey = import.meta.env.VITE_GEMINI_API_KEY || null;
   }
 
   static getInstance(): AIService {
@@ -66,7 +66,7 @@ export class AIService {
   }
 
   /**
-   * Set OpenAI API key
+   * Set Gemini API key
    */
   setApiKey(apiKey: string): void {
     this.apiKey = apiKey;
@@ -76,7 +76,7 @@ export class AIService {
    * Check if AI service is configured
    */
   isConfigured(): boolean {
-    return this.apiKey !== null;
+    return this.apiKey !== null && this.apiKey !== '';
   }
 
   /**
@@ -106,29 +106,51 @@ export class AIService {
     try {
       const systemPrompt = this.createSystemPrompt(context);
       const enhancedPrompt = this.enhancePromptWithNLP(systemPrompt, intent, conflicts);
-      const messages = this.formatMessages(userMessage, context, enhancedPrompt);
+      const contents = this.formatMessagesForGemini(userMessage, context, enhancedPrompt);
       
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`
-        },
-        body: JSON.stringify({
-          model: this.model,
-          messages,
-          max_tokens: this.maxTokens,
-          temperature: this.temperature,
-          functions: this.getMedicationFunctions()
-        })
-      });
+      const response = await fetch(
+        `${this.baseUrl}/models/${this.model}:generateContent?key=${this.apiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contents,
+            generationConfig: {
+              temperature: this.temperature,
+              maxOutputTokens: this.maxTokens,
+              topP: 0.95,
+              topK: 40
+            },
+            safetySettings: [
+              {
+                category: 'HARM_CATEGORY_HARASSMENT',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+              },
+              {
+                category: 'HARM_CATEGORY_HATE_SPEECH',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+              },
+              {
+                category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+              },
+              {
+                category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+              }
+            ]
+          })
+        }
+      );
       
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`);
+        throw new Error(`Gemini API error: ${response.status}`);
       }
 
       const data = await response.json();
-      return this.parseAIResponse(data, context, intent, conflicts);
+      return this.parseGeminiResponse(data, context, intent, conflicts);
     } catch (error) {
       console.error('AI service error:', error);
       return this.getNLPBasedResponse(userMessage, context, intent, conflicts);
@@ -172,97 +194,42 @@ Remember: You are not a replacement for medical professionals. Always encourage 
   }
 
   /**
-   * Format messages for OpenAI API
+   * Format messages for Gemini API
    */
-  private formatMessages(
+  private formatMessagesForGemini(
     userMessage: string,
     context: ChatContext,
     systemPrompt: string
-  ): Array<{ role: string; content: string }> {
-    const messages: Array<{ role: string; content: string }> = [
-      { role: 'system', content: systemPrompt }
-    ];
+  ): Array<{ role: string; parts: Array<{ text: string }> }> {
+    const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+    
+    // Add system prompt as first user message (Gemini doesn't have system role)
+    contents.push({
+      role: 'user',
+      parts: [{ text: `System Instructions:\n${systemPrompt}\n\nPlease acknowledge and follow these instructions.` }]
+    });
+    
+    contents.push({
+      role: 'model',
+      parts: [{ text: 'I understand. I am MediCare AI, ready to help with medication management. How can I assist you today?' }]
+    });
     
     // Add recent conversation history (last 5 messages)
     const recentHistory = context.conversationHistory.slice(-5);
     for (const msg of recentHistory) {
-      messages.push({
-        role: msg.type === 'user' ? 'user' : 'assistant',
-        content: msg.content
+      contents.push({
+        role: msg.type === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content }]
       });
     }
 
     // Add current user message
-    messages.push({
+    contents.push({
       role: 'user',
-      content: userMessage
+      parts: [{ text: userMessage }]
     });
 
-    return messages;
-  }
-
-  /**
-   * Define medication-related functions for OpenAI
-   */
-  private getMedicationFunctions() {
-    return [
-      {
-        name: 'check_medication_status',
-        description: 'Check if a medication was taken today or at a specific time',
-        parameters: {
-          type: 'object',
-          properties: {
-            medicationName: {
-              type: 'string',
-              description: 'Name of the medication to check'
-            },
-            timeframe: {
-              type: 'string',
-              enum: ['today', 'morning', 'afternoon', 'evening', 'specific_time'],
-              description: 'Timeframe to check'
-            }
-          },
-          required: ['medicationName']
-        }
-      },
-      {
-        name: 'get_medication_info',
-        description: 'Get information about a specific medication',
-        parameters: {
-          type: 'object',
-          properties: {
-            medicationName: {
-              type: 'string',
-              description: 'Name of the medication'
-            },
-            infoType: {
-              type: 'string',
-              enum: ['purpose', 'side_effects', 'interactions', 'schedule', 'all'],
-              description: 'Type of information requested'
-            }
-          },
-          required: ['medicationName']
-        }
-      },
-      {
-        name: 'mark_medication_taken',
-        description: 'Mark a medication as taken',
-        parameters: {
-          type: 'object',
-          properties: {
-            medicationName: {
-              type: 'string',
-              description: 'Name of the medication'
-            },
-            time: {
-              type: 'string',
-              description: 'Time when medication was taken (optional)'
-            }
-          },
-          required: ['medicationName']
-        }
-      }
-    ];
+    return contents;
   }
 
   /**
@@ -374,59 +341,51 @@ Remember: You are not a replacement for medical professionals. Always encourage 
   }
 
   /**
-   * Parse AI response and extract actions
+   * Parse Gemini API response
    */
-  private parseAIResponse(data: any, context: ChatContext, detectedIntent?: Intent, conflicts?: ConflictWarning[]): AIResponse {
-    const choice = data.choices?.[0];
-    const message = choice?.message;
-    let responseText = message?.content || 'I apologize, but I could not generate a response. Please try again.';
+  private parseGeminiResponse(
+    data: any,
+    context: ChatContext,
+    detectedIntent?: Intent,
+    conflicts?: ConflictWarning[]
+  ): AIResponse {
+    const candidate = data.candidates?.[0];
+    const content = candidate?.content;
+    let responseText = content?.parts?.[0]?.text || 'I apologize, but I could not generate a response. Please try again.';
     let actions: ChatAction[] = [];
     let medications: Medication[] = [];
-    let intentType = '';
     
-    // Handle function calls
-    if (message?.function_call) {
-      const functionName = message.function_call.name;
-      const functionArgs = JSON.parse(message.function_call.arguments || '{}');
-      intentType = functionName;
-      
-      switch (functionName) {
-        case 'check_medication_status':
-          const medication = this.findMedication(functionArgs.medicationName, context.medications);
-          if (medication) {
-            medications.push(medication);
-            actions.push({
-              type: 'view_medication',
-              medicationId: medication.id,
-              label: `View ${medication.name} details`,
-              data: { medication }
-            });
+    // Extract actions from intent if detected
+    if (detectedIntent) {
+      switch (detectedIntent.type) {
+        case 'check_status':
+        case 'get_info':
+          if (detectedIntent.parameters.medicationName) {
+            const medication = this.findMedication(detectedIntent.parameters.medicationName, context.medications);
+            if (medication) {
+              medications.push(medication);
+              actions.push({
+                type: 'view_medication',
+                medicationId: medication.id,
+                label: `View ${medication.name} details`,
+                data: { medication }
+              });
+            }
           }
           break;
           
-        case 'get_medication_info':
-          const med = this.findMedication(functionArgs.medicationName, context.medications);
-          if (med) {
-            medications.push(med);
-            actions.push({
-              type: 'view_medication',
-              medicationId: med.id,
-              label: `View ${med.name} information`,
-              data: { medication: med }
-            });
-          }
-          break;
-          
-        case 'mark_medication_taken':
-          const takeMed = this.findMedication(functionArgs.medicationName, context.medications);
-          if (takeMed) {
-            medications.push(takeMed);
-            actions.push({
-              type: 'take_medication',
-              medicationId: takeMed.id,
-              label: `Mark ${takeMed.name} as taken`,
-              data: { medication: takeMed }
-            });
+        case 'mark_taken':
+          if (detectedIntent.parameters.medicationName) {
+            const medication = this.findMedication(detectedIntent.parameters.medicationName, context.medications);
+            if (medication) {
+              medications.push(medication);
+              actions.push({
+                type: 'take_medication',
+                medicationId: medication.id,
+                label: `Mark ${medication.name} as taken`,
+                data: { medication }
+              });
+            }
           }
           break;
       }
@@ -446,7 +405,7 @@ Remember: You are not a replacement for medical professionals. Always encourage 
       actions,
       medications,
       confidence: 0.9,
-      intent: detectedIntent?.type || intentType || '',
+      intent: detectedIntent?.type || '',
       entities: detectedIntent?.entities.map(e => ({
         type: e.type,
         value: e.value,

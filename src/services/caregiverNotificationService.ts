@@ -229,28 +229,64 @@ class CaregiverNotificationService {
       throw new Error('Notification not found');
     }
 
-    // Simulate delivery (in production, this would call external APIs)
-    console.log(`[CAREGIVER NOTIFICATION] ${delivery.deliveryMethod.toUpperCase()} to ${delivery.recipient}`);
-    console.log(`Subject: ${notification.title}`);
-    console.log(`Message: ${notification.message}`);
-    console.log(`Severity: ${notification.severity}`);
+    // Get caregiver details for patient name
+    const caregiver = await caregiverService.getCaregiverById(delivery.caregiverId);
+    const patientName = caregiver?.name || 'Your patient';
 
-    // In a real application, you would:
-    // - For email: Use SendGrid, AWS SES, or similar service
-    // - For SMS: Use Twilio, AWS SNS, or similar service
-    // - For push: Use Firebase Cloud Messaging or similar
+    try {
+      if (delivery.deliveryMethod === 'email') {
+        // Send via email API
+        const response = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: delivery.recipient,
+            subject: notification.title,
+            message: notification.message,
+            patientName
+          })
+        });
 
-    // Mark as sent
-    await caregiverNotificationRepository.updateDelivery(delivery.id, {
-      status: 'sent',
-      sentAt: new Date()
-    });
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.details || 'Email delivery failed');
+        }
 
-    // Mark notification as sent
-    await caregiverNotificationRepository.updateNotification(notification.id, {
-      isSent: true,
-      sentAt: new Date()
-    });
+        console.log(`[CAREGIVER] Email sent to ${delivery.recipient}`);
+      } else if (delivery.deliveryMethod === 'sms') {
+        // Send via SMS API
+        const response = await fetch('/api/send-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: delivery.recipient,
+            message: `${notification.title}: ${notification.message}`
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.details || 'SMS delivery failed');
+        }
+
+        console.log(`[CAREGIVER] SMS sent to ${delivery.recipient}`);
+      }
+
+      // Mark as sent
+      await caregiverNotificationRepository.updateDelivery(delivery.id, {
+        status: 'sent',
+        sentAt: new Date()
+      });
+
+      // Mark notification as sent
+      await caregiverNotificationRepository.updateNotification(notification.id, {
+        isSent: true,
+        sentAt: new Date()
+      });
+    } catch (error) {
+      console.error(`Failed to send ${delivery.deliveryMethod}:`, error);
+      throw error;
+    }
   }
 
   /**

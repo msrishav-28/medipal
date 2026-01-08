@@ -10,7 +10,7 @@ MediPal is a modern, accessible medication management solution designed to help 
 
 ### Medication Management
 - Voice-powered medication entry with natural language processing
-- OCR prescription scanning using Tesseract.js
+- OCR prescription scanning using Mistral OCR API
 - Multi-step medication wizard with validation
 - Swipe gestures for quick actions on mobile
 - Comprehensive medication database with conflict detection
@@ -24,7 +24,7 @@ MediPal is a modern, accessible medication management solution designed to help 
 
 ### AI Assistant
 - Conversational interface for medication queries
-- OpenAI integration for intelligent responses
+- Google Gemini integration for intelligent responses
 - Context-aware medication information
 - Natural language medication parsing
 - Quick suggestion buttons for common queries
@@ -62,32 +62,38 @@ MediPal is a modern, accessible medication management solution designed to help 
 ## Technical Stack
 
 ### Frontend
-- React 18.3.1
-- TypeScript 5.6.2
-- Vite 6.0.7
+- React 18.2.0
+- TypeScript 5.2.2
+- Vite 5.0.8
 - TailwindCSS 3.4.17
-- React Query 5.62.7
+- Framer Motion 12.x
+- React Query 5.90.5
+
+### UI Design System
+- Crystal Clear glassmorphism design
+- Custom GlassCard and BentoGrid components
+- Responsive layouts with DashboardLayout
+- Modern sidebar and bottom navigation
 
 ### Data Management
-- IndexedDB with Dexie 4.0.10
+- IndexedDB with Dexie 4.2.1
 - Offline-first data synchronization
 - Optimistic updates
 - Data migration system
 
 ### AI and Voice
-- OpenAI API integration
+- Google Gemini API integration
 - Web Speech API
-- Tesseract.js for OCR
+- Mistral OCR for prescription scanning
 - Natural Language Processing
 
 ### Testing
 - Vitest 4.0.3
 - React Testing Library
-- 34+ test suites
 - Integration and unit tests
 
 ### PWA
-- Workbox 7.3.0
+- Workbox 7.3.0 via vite-plugin-pwa
 - Service Worker caching
 - Background sync
 - Push notifications
@@ -100,25 +106,31 @@ MediPal/
 │   ├── components/
 │   │   ├── accessibility/     # Accessibility utilities
 │   │   ├── caregiver/         # Caregiver dashboard and features
-│   │   ├── dev/               # Development tools
-│   │   ├── history/           # Analytics and reporting
-│   │   ├── layout/            # Navigation and layout components
+│   │   ├── layout/            # Navigation, Sidebar, responsive components
 │   │   ├── medication/        # Medication management UI
 │   │   ├── notification/      # Reminder and notification UI
 │   │   ├── pwa/               # PWA components
 │   │   ├── providers/         # React context providers
-│   │   └── ui/                # Reusable UI components
+│   │   └── ui/                # Reusable UI components (GlassCard, BentoGrid, etc.)
 │   ├── hooks/                 # Custom React hooks
+│   ├── layouts/               # Page layouts (DashboardLayout)
+│   ├── lib/                   # Utility libraries
+│   ├── pages/                 # Application pages
+│   │   ├── Dashboard.tsx      # Main dashboard
+│   │   ├── Medications.tsx    # Medication list
+│   │   ├── Schedule.tsx       # Schedule view
+│   │   ├── Reports.tsx        # Analytics and reports
+│   │   ├── Chat.tsx           # AI chatbot
+│   │   ├── Settings.tsx       # User settings
+│   │   └── ...                # Other pages
 │   ├── services/              # Business logic and API services
 │   ├── types/                 # TypeScript type definitions
 │   ├── utils/                 # Utility functions
 │   ├── test/                  # Test configuration and utilities
-│   ├── App.tsx                # Demo application
-│   ├── MainApp.tsx            # Production application
+│   ├── App.tsx                # Main application with routing
 │   └── main.tsx               # Application entry point
 ├── public/
-│   ├── sw.js                  # Service Worker
-│   ├── manifest.json          # PWA manifest
+│   ├── manifest.webmanifest   # PWA manifest
 │   └── icons/                 # Application icons
 └── .kiro/specs/               # Project specifications
 ```
@@ -148,7 +160,8 @@ npm run dev
 Create a `.env` file in the root directory:
 
 ```env
-VITE_OPENAI_API_KEY=your_openai_api_key
+VITE_GEMINI_API_KEY=your_gemini_api_key
+VITE_MISTRAL_API_KEY=your_mistral_api_key
 ```
 
 ### Available Scripts
@@ -168,6 +181,8 @@ npm run test:coverage    # Generate coverage report
 
 # Code Quality
 npm run lint             # Lint code
+npm run lint:fix         # Fix lint errors
+npm run format           # Format code with Prettier
 npm run type-check       # Type check with TypeScript
 npm run analyze          # Analyze bundle size
 ```
@@ -244,7 +259,7 @@ The application is designed to be accessible to all users:
 - Largest Contentful Paint (LCP): < 2.5s
 - Cumulative Layout Shift (CLS): < 0.1
 - Time to First Byte (TTFB): < 800ms
-- Bundle Size (gzipped): < 500KB
+- Bundle Size (gzipped): < 250KB
 
 ### Optimization Strategies
 - Vendor chunk splitting
@@ -253,32 +268,6 @@ The application is designed to be accessible to all users:
 - Service Worker caching
 - Database indexing
 - Debounced search and filters
-
-## Testing
-
-### Test Coverage
-- 34+ test suites
-- Unit tests for services and utilities
-- Component tests with React Testing Library
-- Integration tests for user workflows
-- Accessibility testing with automated audits
-- Cross-browser compatibility testing
-
-### Running Tests
-
-```bash
-# All tests
-npm test
-
-# Specific test file
-npm test -- medication.test.tsx
-
-# With coverage
-npm run test:coverage
-
-# Integration tests only
-npm run test:integration
-```
 
 ## Deployment
 
@@ -302,37 +291,21 @@ npm install -g netlify-cli
 netlify deploy --prod
 ```
 
-## Contributing
-
-This project follows the Kiro Spec Workflow:
-
-1. Requirements gathering (requirements.md)
-2. Design documentation (design.md)
-3. Task breakdown (tasks.md)
-4. Systematic implementation
-5. Testing and validation
-
 ## License
 
 MIT License - see LICENSE file for details
 
 ## Project Status
 
-Current Version: 1.0.0
-Completion: 100% (All 11 tasks completed)
+Current Version: 1.2.0
+Last Updated: January 2026
 
-### Completed Tasks
-1. Project Foundation
-2. Design System and Responsive Layout
-3. Data Layer and State Management
-4. Medication Management
-5. Reminder and Notification System
-6. Intake Tracking and Confirmation
-7. Conversational AI Interface
-8. Caregiver Monitoring Features
-9. History and Analytics Features
-10. PWA Capabilities and Offline Functionality
-11. Integration and Final Polish
+### Recent Updates
+- Google Gemini AI integration for chatbot
+- Mistral OCR API for prescription scanning
+- Caregiver email/SMS alerts via Vercel serverless
+- Vercel deployment configuration
+- ESLint and project cleanup
 
 ## Support
 

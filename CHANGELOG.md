@@ -5,6 +5,53 @@ All notable changes to the MediPal project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-01-08
+
+### Added
+- Caregiver email notifications via Resend API
+- Caregiver SMS notifications via TextBelt/Twilio
+- Vercel serverless API routes (`/api/send-email`, `/api/send-sms`)
+- Vercel deployment configuration (`vercel.json`)
+
+### Changed
+- Replaced OpenAI with Google Gemini API for AI chatbot
+- Replaced Tesseract.js with Mistral OCR API for prescription scanning
+- Updated environment variables for new API integrations
+- Fixed ESLint configuration for proper linting
+
+### Removed
+- Tesseract.js dependency (now using cloud-based Mistral OCR)
+- OpenAI dependency
+
+## [1.1.0] - 2026-01-08
+
+### Added
+- Crystal Clear glassmorphism design system
+- New pages: Dashboard, Schedule, Reports, Chat, Settings
+- GlassCard component for modern UI panels
+- BentoGrid component for dashboard layouts
+- DashboardLayout with responsive sidebar
+- Bottom navigation for mobile devices
+- Improved skeleton loading states
+
+### Changed
+- Modernized UI with glassmorphism aesthetic
+- Updated all page designs with new design system
+- Improved mobile responsiveness across all pages
+- Enhanced navigation with collapsible sidebar
+
+### Removed
+- Duplicate UI components (bento-grid.tsx, skeleton.tsx)
+- Demo components (VoiceInputDemo, MedicationParsingDemo)
+- Development tools folder (PerformanceDashboard)
+- Legacy history components (moved to Reports page)
+- MainApp.tsx (consolidated into App.tsx)
+- postcss.config.js (using inline config)
+
+### Fixed
+- Broken imports after component cleanup
+- Build errors from orphaned file references
+
 ## [1.0.0] - 2025-11-01
 
 ### Added
@@ -12,9 +59,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Core Features
 - Complete medication management system with CRUD operations
 - Voice-powered medication entry using Web Speech API
-- OCR prescription scanning with Tesseract.js integration
-- AI chatbot for medication queries using OpenAI API
+- AI chatbot for medication queries using Google Gemini API
 - Natural language processing for medication parsing
+- OCR prescription scanning with Mistral OCR API
 - Smart reminder system with customizable schedules
 - Caregiver monitoring dashboard with access control
 - Analytics and reporting with PDF export capability
@@ -30,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### User Interface
 - Comprehensive design system with Tailwind CSS
-- 100+ reusable UI components
+- Reusable UI components
 - Skeleton loading states
 - Error boundaries for fault tolerance
 - Accessibility features (WCAG AA compliant)
@@ -39,39 +86,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Keyboard navigation support
 
 #### Testing
-- 34+ test suites covering all features
 - Unit tests for services and utilities
 - Component tests with React Testing Library
 - Integration tests for user workflows
 - Accessibility testing with automated audits
-- 68% test coverage
 
 #### Performance
 - Code splitting by feature and route
 - Lazy loading for heavy components
 - Service Worker caching strategy
 - Web Vitals monitoring
-- Bundle size optimization (< 500KB gzipped)
-
-#### Developer Tools
-- Development dashboard with performance metrics
-- Accessibility audit tools
-- Browser compatibility detection
-- TypeScript strict mode throughout
-- ESLint and Prettier configuration
-- Comprehensive documentation
-
-### Changed
-- N/A (Initial release)
-
-### Deprecated
-- N/A (Initial release)
-
-### Removed
-- N/A (Initial release)
-
-### Fixed
-- N/A (Initial release)
+- Bundle size optimization (<250KB gzipped)
 
 ### Security
 - Encrypted local data storage with IndexedDB
@@ -82,25 +107,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Project Completion Status
 
-### Completed Tasks (11/11)
-
-1. **Project Foundation** - React, TypeScript, Vite, PWA setup
-2. **Design System** - Tailwind CSS, responsive layout, accessibility
-3. **Data Layer** - IndexedDB, Dexie, state management, React Query
-4. **Medication Management** - CRUD operations, forms, validation
-5. **Reminder System** - Notifications, scheduling, voice reminders
-6. **Intake Tracking** - Confirmation, adherence calculation, streaks
-7. **AI Interface** - Chatbot, speech recognition, NLP
-8. **Caregiver Features** - Monitoring, alerts, reports
-9. **Analytics** - History, charts, PDF export, data export
-10. **PWA Capabilities** - Offline mode, Service Worker, installation
-11. **Integration & Polish** - Connected components, error handling, testing
-
-### Test Results
-- Unit Tests: 369 passing
-- Integration Tests: 6 passing
-- Total Test Files: 41
-- Production Code: 0 TypeScript errors
+### Completed Tasks
+1. Project Foundation - React, TypeScript, Vite, PWA setup
+2. Design System - Tailwind CSS, responsive layout, accessibility
+3. Data Layer - IndexedDB, Dexie, state management, React Query
+4. Medication Management - CRUD operations, forms, validation
+5. Reminder System - Notifications, scheduling, voice reminders
+6. Intake Tracking - Confirmation, adherence calculation, streaks
+7. AI Interface - Chatbot, speech recognition, NLP
+8. Caregiver Features - Monitoring, alerts, reports
+9. Analytics - Reports page, PDF export, data export
+10. PWA Capabilities - Offline mode, Service Worker, installation
+11. Frontend Modernization - Crystal Clear design system
 
 ### Browser Support
 - Chrome 90+
@@ -115,23 +133,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cumulative Layout Shift: < 0.1
 - Time to First Byte: < 800ms
 
-## Development Timeline
-
-- 2025-01-11: Tasks 1-10 completed (90% feature complete)
-- 2025-11-01: Task 11 completed (100% feature complete)
-- 2025-11-01: Test fixes and documentation improvements
-- 2025-11-01: Version 1.0.0 release
-
 ## Future Roadmap
 
-### Planned for v1.1.0
+### Planned for v1.2.0
 - Enhanced E2E testing with Playwright
 - Additional language support (i18n)
 - Dark mode improvements
 - Advanced analytics visualizations
 - Medication interaction database
 
-### Planned for v1.2.0
+### Planned for v1.3.0
 - Cloud synchronization option
 - Multi-user support
 - Healthcare provider integration
@@ -148,15 +159,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Credits
 
 Built with modern web technologies:
-- React 18.3.1
-- TypeScript 5.6.2
-- Vite 6.0.7
+- React 18.2.0
+- TypeScript 5.2.2
+- Vite 5.0.8
 - TailwindCSS 3.4.17
-- Dexie 4.0.10
-- React Query 5.62.7
+- Framer Motion 12.x
+- Dexie 4.2.1
+- React Query 5.90.5
 - Vitest 4.0.3
-- OpenAI API
-- Tesseract.js
+- Google Gemini API
+- Mistral OCR API
 
 ## License
 
